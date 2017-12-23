@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="89088">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="88576">
       <assemblyIdentity name="PMU_Plotter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>leg0+gSgaR4oa/Fn/2cbTiJujxDRKczkHo7b8E1ZzXQ=</dsig:DigestValue>
+        <dsig:DigestValue>qjzO5B1XJxsy/6eUnPGP7Ph3ENRUJYmQs3OsWqbborM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

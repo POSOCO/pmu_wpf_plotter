@@ -24,11 +24,14 @@ namespace PMU_Plotter
                 var fileName = args[1];
                 if (File.Exists(fileName))
                 {
+                    /*
                     var extension = Path.GetExtension(fileName);
                     if (extension == ".sudhir")
                     {
                         this.Properties["ArbitraryArgName"] = fileName;
                     }
+                    */
+                    this.Properties["ArbitraryArgName"] = fileName;
                 }
             }
             base.OnStartup(e);
