@@ -17,3 +17,5 @@ C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\PMU_
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\PMU_Plotter.application
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\PMU_Plotter.exe.manifest
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\PMU_Plotter.application
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\AboutWindow.g.cs
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\AboutWindow.baml

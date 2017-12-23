@@ -63,5 +63,11 @@ namespace PMU_Plotter
                 WelcomeText.Text = String.Join("\n", lines);
             }
         }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            AboutWindow aboutWindow = new AboutWindow();
+            aboutWindow.Show();
+        }
     }
 }
