@@ -19,3 +19,9 @@ C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\PMU_
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\PMU_Plotter.application
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\AboutWindow.g.cs
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\AboutWindow.baml
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.dll
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.Wpf.dll
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.pdb
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.xml
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.Wpf.pdb
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.Wpf.xml

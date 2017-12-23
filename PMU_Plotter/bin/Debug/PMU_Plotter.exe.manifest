@@ -43,14 +43,38 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="88576">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LiveCharts.dll" size="152064">
+      <assemblyIdentity name="LiveCharts" version="0.9.7.0" publicKeyToken="0BC1F845D1EBB8DF" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>n8+Jg3tg9pwcUB5M+k0oYIh6/QuPMlgDNn55Wk47yco=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LiveCharts.Wpf.dll" size="217600">
+      <assemblyIdentity name="LiveCharts.Wpf" version="0.9.7.0" publicKeyToken="0BC1F845D1EBB8DF" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>G9uxtcGlBlPlwmFh6bfAPtxRhyGm4Q6hgKhASdlnEGs=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="92160">
       <assemblyIdentity name="PMU_Plotter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>qjzO5B1XJxsy/6eUnPGP7Ph3ENRUJYmQs3OsWqbborM=</dsig:DigestValue>
+        <dsig:DigestValue>08ve5BxVqgQSOTIK+KbWlnnKpAIXvX7Q9l6VNzkK2n4=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
