@@ -6,7 +6,27 @@
         xmlns:local="clr-namespace:PMU_Plotter"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <TextBox Name="WelcomeText" Text="Hello World!"></TextBox>
-    </Grid>
+    <Window.CommandBindings>
+        <CommandBinding Command="Open" CanExecute="OpenCommand_CanExecute" Executed="OpenCommand_Executed" />
+    </Window.CommandBindings>
+    <DockPanel>
+        <Menu IsMainMenu="True" DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Command="Open"/>
+                <Separator />
+                <MenuItem Header="_Exit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Edit" />
+            <MenuItem Header="_View" />
+            <MenuItem Header="_Window" />
+            <MenuItem Header="_Help" />
+        </Menu>
+        <ScrollViewer Margin="5" CanContentScroll="False"
+              VerticalScrollBarVisibility ="Auto" HorizontalScrollBarVisibility="Auto">
+            <Grid>
+                <TextBox Name="WelcomeText" Text="Hello World!" AcceptsReturn="True"></TextBox>
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+    
 </Window>
