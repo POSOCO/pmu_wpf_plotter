@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System.ComponentModel;
+using LiveCharts.Defaults;
 
 namespace PMU_Plotter
 {
@@ -25,9 +26,11 @@ namespace PMU_Plotter
     public partial class MainWindow : Window
     {
         public SeriesCollection SeriesCollection { get; set; }
-        public string[] Labels { get; set; }
         public long Step { get; set; }
+        public double xMin { get; set; }
+        public double xMax { get; set; }
         public Func<double, string> YFormatter { get; set; }
+        public Func<double, string> XFormatter { get; set; }
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
         public MainWindow()
@@ -40,47 +43,16 @@ namespace PMU_Plotter
             _configManager.Initialize();
             _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
-
-            SeriesCollection = new SeriesCollection
-            {
-                new LineSeries
-                {
-                    Title = "Series 1",
-                    Values = new ChartValues<float> { 4, 6, 5, 2 ,4 }
-                },
-                new LineSeries
-                {
-                    Title = "Series 2",
-                    Values = new ChartValues<float> { 6, 7, 3, 4 ,6 },
-                    PointGeometry = null
-                },
-                new LineSeries
-                {
-                    Title = "Series 3",
-                    Values = new ChartValues<float> { 4,2,7,2,7 },
-                    PointGeometry = DefaultGeometries.Square,
-                    PointGeometrySize = 15
-                }
-            };
-
-            Labels = new[] { "Jan", "Feb", "Mar", "Apr", "May" };
+            SeriesCollection = new SeriesCollection();
+            xMin = double.NaN;
+            xMax = double.NaN;
+            //Labels = new string[0];
             Step = 1;
-            YFormatter = value => value.ToString("C");
-
-            //modifying the series collection will animate and update the chart
-            SeriesCollection.Add(new LineSeries
+            YFormatter = value => String.Format("{0:0.###}", value);
+            XFormatter = delegate (double val)
             {
-                Title = "Series 4",
-                Values = new ChartValues<float> { 5, 3, 2, 4 },
-                LineSmoothness = 0, //0: straight lines, 1: really smooth lines
-                //PointGeometry = Geometry.Parse("m 25 70.36218 20 -28 -20 22 -8 -6 z"),
-                PointGeometry = DefaultGeometries.Diamond,
-                //PointGeometrySize = 50,
-                PointForeground = Brushes.Gray
-            });
-
-            //modifying any series values will also animate and update the chart
-            SeriesCollection[3].Values.Add(5f);
+                return val.ToString();
+            };
             MyChart.LegendLocation = LegendLocation.Top;
             DataContext = this;
         }
@@ -129,7 +101,7 @@ namespace PMU_Plotter
 
         public void plotMeasIds(DateTime startTime, DateTime endTime, List<int> measurementIDs, int dataRate)
         {
-            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs };
+            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, historyAdapter = _historyAdapter };
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWork;
@@ -140,10 +112,10 @@ namespace PMU_Plotter
 
         private void TestBtn_Click(object sender, RoutedEventArgs e)
         {
-            DateTime startTime = DateTime.Now.AddMinutes(-5).AddSeconds(-2);
+            DateTime startTime = DateTime.Now.AddSeconds(-5);
             DateTime endTime = DateTime.Now.AddSeconds(-2);
             int dataRate = 25;
-            List<int> measurementIDs = new List<int>() { 4924, 4929 };
+            List<int> measurementIDs = new List<int>() { 4924 };
             plotMeasIds(startTime, endTime, measurementIDs, dataRate);
         }
 
@@ -157,6 +129,11 @@ namespace PMU_Plotter
             DateTime startTime = (DateTime)argument.GetType().GetProperty("startTime").GetValue(argument, null);
             DateTime endTime = (DateTime)argument.GetType().GetProperty("endTime").GetValue(argument, null);
             List<int> measurementIDs = (List < int >)argument.GetType().GetProperty("measurementIDs").GetValue(argument, null);
+            // HistoryDataAdapter _historyAdapter = (HistoryDataAdapter)argument.GetType().GetProperty("historyAdapter").GetValue(argument, null);
+            ConfigurationManager _configManager = new ConfigurationManager();
+            _configManager.Initialize();
+            HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
+            _historyAdapter.Initialize(_configManager);
             Dictionary<object, List<PMUDataStructure>> parsedData = _historyAdapter.GetData(startTime, endTime, measurementIDs, true, false, dataRate);
             e.Result = new { parsedData = parsedData, startTime=startTime, endTime=endTime, dataRate=dataRate,measurementIDs=measurementIDs };
         }
@@ -176,36 +153,26 @@ namespace PMU_Plotter
             Dictionary<object, List<PMUDataStructure>> parsedData = (Dictionary < object, List< PMUDataStructure >>)res.GetType().GetProperty("parsedData").GetValue(res, null);
             List<int> measurementIDs = (List < int >)res.GetType().GetProperty("measurementIDs").GetValue(res, null);
             int dataRate = (int)res.GetType().GetProperty("dataRate").GetValue(res, null);
-            SeriesCollection = new SeriesCollection();
+            // SeriesCollection = new SeriesCollection();
+            SeriesCollection.Clear();
             PMUMeasDataLists lists;
             // check if we have atleast one measurement
-            if (measurementIDs.Count > 1 && parsedData != null)
+            if (measurementIDs.Count > 0 && parsedData != null)
             {
                 // lets keep step as 1 minute. Todo change step as per the plot preferences.
-                Step = dataRate * 60;
+                Step = dataRate;
+                
                 // get 1st list and add to SeriesCollection
                 lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
-                SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals) });
-                // update the labels from first measurement lists.pmuTimeStamps
-                Labels = new string[lists.pmuTimeStamps.Count];
-                for (int i = 0; i < lists.pmuTimeStamps.Count; i++)
-                {
-                    DateTime timeStamp = lists.pmuTimeStamps.ElementAt(i);
-                    if (timeStamp.Minute == 0 && timeStamp.Hour == 0 && timeStamp.Second == 0 && timeStamp.Millisecond == 0)
-                    {
-                        Labels[i] = timeStamp.ToString("dd-MM-yyyy");
-                    }
-                    else
-                    {
-                        Labels[i] = timeStamp.ToString("HH:mm:ss.fff");
-                    }
-                }
+                SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<DateTimePoint>(lists.getDateTimePoints()), PointGeometry = null });
+                
                 // get the data of remaining measurements and add to SeriesCollection
                 for (int i = 1; i < measurementIDs.Count; i++)
                 {
                     lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
-                    SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals) });
+                    SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<DateTimePoint>(lists.getDateTimePoints()), PointGeometry = null });
                 }
+                
             }
             System.Console.WriteLine("Viola! Finished plotting...");            
         }
