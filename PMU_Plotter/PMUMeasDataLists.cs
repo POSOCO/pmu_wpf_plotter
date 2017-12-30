@@ -1,4 +1,5 @@
-﻿using System;
+using LiveCharts.Defaults;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,16 @@ namespace PMU_Plotter
             this.pmuVals = pmuVals;
             this.pmuQualities = pmuQualities;
             this.pmuTimeStamps = pmuTimeStamps;
+        }
+
+        public List<DateTimePoint> getDateTimePoints()
+        {
+            List<DateTimePoint> points = new List<DateTimePoint>();
+            for (int i=0;i<pmuTimeStamps.Count;i++)
+            {
+                points.Add(new DateTimePoint(pmuTimeStamps.ElementAt(i), pmuVals.ElementAt(i)));
+            }
+            return points;
         }
     }
 }
