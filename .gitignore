@@ -1,0 +1,5 @@
+.vs/
+Service References/
+PMU_Plotter/PMU_Plotter/PhasorPointBinaryDataParser.cs
+PMU_Plotter/PMU_Plotter/PhasorPointEndpointBehavior.cs
+PMU_Plotter/PMU_Plotter/PhasorPointMessageInspector.cs
