@@ -34,7 +34,7 @@
                 </Grid.RowDefinitions>
                 <TextBox Name="WelcomeText" Text="Hello World!" AcceptsReturn="True"></TextBox>
                 <Button Name="TestBtn" Grid.Row="1" Click="TestBtn_Click">Test</Button>
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="2" Name="MyChart">
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="2" Name="MyChart" Zoom="Xy" Pan="Xy">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
