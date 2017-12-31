@@ -1,0 +1,6 @@
+{
+	measIds: [4924, 4929],
+	measurementNames: ["BACHU_DEGHAM", "DEGHAM_PIRANA"],
+	dataSetName: "Title",
+	dataRate: 25
+}
