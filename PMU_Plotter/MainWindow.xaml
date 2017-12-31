@@ -11,19 +11,34 @@
         <CommandBinding Command="Open" CanExecute="OpenCommand_CanExecute" Executed="OpenCommand_Executed" />
     </Window.CommandBindings>
     <DockPanel>
-        <Menu IsMainMenu="True" DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-                <MenuItem Command="Open"/>
-                <Separator />
-                <MenuItem Header="_Exit" Click="Exit_Click"/>
-            </MenuItem>
-            <MenuItem Header="_Edit" />
-            <MenuItem Header="_View" />
-            <MenuItem Header="_Window" />
-            <MenuItem Header="_Help">
-                <MenuItem Header="_About" Click="About_Click"/>
-            </MenuItem>
-        </Menu>
+        <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
+            <Menu IsMainMenu="True">
+                <MenuItem Header="_File">
+                    <MenuItem Command="Open"/>
+                    <Separator />
+                    <MenuItem Header="_Exit" Click="Exit_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Edit" />
+                <MenuItem Header="_View" />
+                <MenuItem Header="_Window" />
+                <MenuItem Header="_Help">
+                    <MenuItem Header="_About" Click="About_Click"/>
+                </MenuItem>
+                <MenuItem Header="Zoom">
+                    <MenuItem Header="ZoomXY" Tag="ZXY" Click="Zoom_Click" IsCheckable="True" IsChecked="True"/>
+                    <MenuItem Header="ZoomX" Tag="ZX" Click="Zoom_Click" IsCheckable="True"/>
+                    <MenuItem Header="ZoomY" Tag="ZY" Click="Zoom_Click" IsCheckable="True"/>
+                    <MenuItem Header="ZoomOff" Tag="ZOff" Click="Zoom_Click" IsCheckable="True"/>
+                </MenuItem>
+                <MenuItem Header="Pan">
+                    <MenuItem Header="PaXY" Tag="PXY" Click="Pan_Click" IsCheckable="True" IsChecked="True"/>
+                    <MenuItem Header="PanX" Tag="PX" Click="Pan_Click" IsCheckable="True"/>
+                    <MenuItem Header="PanY" Tag="PY" Click="Pan_Click" IsCheckable="True"/>
+                    <MenuItem Header="PanOff" Tag="POff" Click="Pan_Click" IsCheckable="True"/>
+                </MenuItem>
+                <MenuItem Header="Reset" Click="Reset_Click"></MenuItem>
+            </Menu>
+        </StackPanel>        
         <ScrollViewer Margin="5" CanContentScroll="False"
               VerticalScrollBarVisibility ="Auto" HorizontalScrollBarVisibility="Auto">
             <Grid>
@@ -38,7 +53,7 @@
                         <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Time" LabelFormatter="{Binding XFormatter}" MinValue="{Binding xMin}" MaxValue="{Binding xMax}">
+                        <lvc:Axis Title="Time" LabelFormatter="{Binding XFormatter}">
                             <lvc:Axis.Separator>
                                 <lvc:Separator IsEnabled="False"></lvc:Separator>
                             </lvc:Axis.Separator>

@@ -29,8 +29,6 @@ namespace PMU_Plotter
     {
         public SeriesCollection SeriesCollection { get; set; }
         public long Step { get; set; }
-        public double xMin { get; set; }
-        public double xMax { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> XFormatter { get; set; }
         public List<DateTime> timeStamps_ { get; set; }
@@ -50,8 +48,6 @@ namespace PMU_Plotter
             SeriesCollection = new SeriesCollection();
             timeStamps_ = new List<DateTime>();
             plotTemplate_ = new PlotDataTemplate();
-            xMin = double.NaN;
-            xMax = double.NaN;
             //Labels = new string[0];
             Step = 1;
             YFormatter = value => String.Format("{0:0.###}", value);
@@ -124,6 +120,74 @@ namespace PMU_Plotter
         {
             AboutWindow aboutWindow = new AboutWindow();
             aboutWindow.Show();
+        }
+
+        private void Zoom_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem mItem = sender as MenuItem;
+            mItem.IsChecked = true;
+            foreach (MenuItem item in (mItem.Parent as MenuItem).Items)
+            {
+                if (item.Tag != mItem.Tag)
+                {
+                    item.IsChecked = false;
+                }
+            }
+            if (mItem.Tag.ToString() == "ZXY")
+            {
+                MyChart.Zoom = ZoomingOptions.Xy;
+            }
+            else if (mItem.Tag.ToString() == "ZX")
+            {
+                MyChart.Zoom = ZoomingOptions.X;
+            }
+            else if (mItem.Tag.ToString() == "ZY")
+            {
+                MyChart.Zoom = ZoomingOptions.Y;
+            }
+            else if (mItem.Tag.ToString() == "ZOff")
+            {
+                MyChart.Zoom = ZoomingOptions.None;
+            }
+        }
+
+        private void Pan_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem mItem = sender as MenuItem;
+            mItem.IsChecked = true;
+            foreach (MenuItem item in (mItem.Parent as MenuItem).Items)
+            {
+                if (item.Tag != mItem.Tag)
+                {
+                    item.IsChecked = false;
+                }
+            }
+            if (mItem.Tag.ToString() == "PXY")
+            {
+                MyChart.Pan = PanningOptions.Xy;
+            }
+            else if (mItem.Tag.ToString() == "PX")
+            {
+                MyChart.Pan = PanningOptions.X;
+            }
+            else if (mItem.Tag.ToString() == "PY")
+            {
+                MyChart.Pan = PanningOptions.Y;
+            }
+            else if (mItem.Tag.ToString() == "POff")
+            {
+                MyChart.Pan = PanningOptions.None;
+            }
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+            MyChart.AxisX[0].MinValue = double.NaN;
+            MyChart.AxisX[0].MaxValue = double.NaN;
+            MyChart.AxisY[0].MinValue = double.NaN;
+            MyChart.AxisY[0].MaxValue = double.NaN;
+            // todo make it more procedural by function
+            WelcomeText.Text = "Reset Axis done...\n" + WelcomeText.Text;
         }
 
         public void plotMeasIds(DateTime startTime, DateTime endTime)
