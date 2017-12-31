@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +31,8 @@ namespace PMU_Plotter
         public double xMax { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> XFormatter { get; set; }
+        public List<DateTime> timeStamps_ { get; set; }
+        public int dataRate_ { get; set; }
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
         public MainWindow()
@@ -44,6 +46,8 @@ namespace PMU_Plotter
             _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
             SeriesCollection = new SeriesCollection();
+            timeStamps_ = new List<DateTime>();
+            dataRate_ = 25;
             xMin = double.NaN;
             xMax = double.NaN;
             //Labels = new string[0];
@@ -51,6 +55,27 @@ namespace PMU_Plotter
             YFormatter = value => String.Format("{0:0.###}", value);
             XFormatter = delegate (double val)
             {
+                if (timeStamps_.Count > 0)
+                {
+                    DateTime startTimeStamp = timeStamps_.ElementAt(0);
+                    DateTime timeStamp;
+
+                    if (val == 0 || val == (double)(timeStamps_.Count - 1))
+                    {
+                        timeStamp = timeStamps_.ElementAt((int)val);
+                        return timeStamp.ToString("dd-MM-yyyy HH:mm:ss.fff");
+                    }
+                    else
+                    {
+                        timeStamp = startTimeStamp.AddSeconds(val / (double)dataRate_);
+                        if (timeStamp.Hour == 0 && timeStamp.Minute == 0 && timeStamp.Second == 0 && timeStamp.Millisecond == 0)
+                        {
+                            return timeStamp.ToString("dd-MM-yyyy");
+                        }
+                        return timeStamp.ToString("HH:mm:ss.fff");
+                    }
+
+                }
                 return val.ToString();
             };
             MyChart.LegendLocation = LegendLocation.Top;
@@ -101,7 +126,7 @@ namespace PMU_Plotter
 
         public void plotMeasIds(DateTime startTime, DateTime endTime, List<int> measurementIDs, int dataRate)
         {
-            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, historyAdapter = _historyAdapter };
+            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs };
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWork;
@@ -112,11 +137,10 @@ namespace PMU_Plotter
 
         private void TestBtn_Click(object sender, RoutedEventArgs e)
         {
-            DateTime startTime = DateTime.Now.AddSeconds(-5);
-            DateTime endTime = DateTime.Now.AddSeconds(-2);
-            int dataRate = 25;
-            List<int> measurementIDs = new List<int>() { 4924 };
-            plotMeasIds(startTime, endTime, measurementIDs, dataRate);
+            DateTime startTime = DateTime.Now.AddDays(-1).AddSeconds(-3);
+            DateTime endTime = DateTime.Now.AddDays(-1);
+            List<int> measurementIDs = new List<int>() { 4924, 4929 };
+            plotMeasIds(startTime, endTime, measurementIDs, dataRate_);
         }
 
         // created by sudhir on 30.12.2017
@@ -128,21 +152,20 @@ namespace PMU_Plotter
             int dataRate = (int)argument.GetType().GetProperty("dataRate").GetValue(argument, null);
             DateTime startTime = (DateTime)argument.GetType().GetProperty("startTime").GetValue(argument, null);
             DateTime endTime = (DateTime)argument.GetType().GetProperty("endTime").GetValue(argument, null);
-            List<int> measurementIDs = (List < int >)argument.GetType().GetProperty("measurementIDs").GetValue(argument, null);
-            // HistoryDataAdapter _historyAdapter = (HistoryDataAdapter)argument.GetType().GetProperty("historyAdapter").GetValue(argument, null);
+            List<int> measurementIDs = (List<int>)argument.GetType().GetProperty("measurementIDs").GetValue(argument, null);
             ConfigurationManager _configManager = new ConfigurationManager();
             _configManager.Initialize();
             HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
             Dictionary<object, List<PMUDataStructure>> parsedData = _historyAdapter.GetData(startTime, endTime, measurementIDs, true, false, dataRate);
-            e.Result = new { parsedData = parsedData, startTime=startTime, endTime=endTime, dataRate=dataRate,measurementIDs=measurementIDs };
+            e.Result = new { parsedData = parsedData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs };
         }
 
         // created by sudhir on 30.12.2017
         // worker thread ui update stuff
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            
+
         }
 
         // created by sudhir on 30.12.2017
@@ -150,8 +173,8 @@ namespace PMU_Plotter
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             object res = e.Result;
-            Dictionary<object, List<PMUDataStructure>> parsedData = (Dictionary < object, List< PMUDataStructure >>)res.GetType().GetProperty("parsedData").GetValue(res, null);
-            List<int> measurementIDs = (List < int >)res.GetType().GetProperty("measurementIDs").GetValue(res, null);
+            Dictionary<object, List<PMUDataStructure>> parsedData = (Dictionary<object, List<PMUDataStructure>>)res.GetType().GetProperty("parsedData").GetValue(res, null);
+            List<int> measurementIDs = (List<int>)res.GetType().GetProperty("measurementIDs").GetValue(res, null);
             int dataRate = (int)res.GetType().GetProperty("dataRate").GetValue(res, null);
             // SeriesCollection = new SeriesCollection();
             SeriesCollection.Clear();
@@ -161,20 +184,20 @@ namespace PMU_Plotter
             {
                 // lets keep step as 1 minute. Todo change step as per the plot preferences.
                 Step = dataRate;
-                
                 // get 1st list and add to SeriesCollection
                 lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
-                SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<DateTimePoint>(lists.getDateTimePoints()), PointGeometry = null });
-                
+                timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
+                SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
+
                 // get the data of remaining measurements and add to SeriesCollection
                 for (int i = 1; i < measurementIDs.Count; i++)
                 {
                     lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
-                    SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<DateTimePoint>(lists.getDateTimePoints()), PointGeometry = null });
+                    SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
                 }
-                
+
             }
-            System.Console.WriteLine("Viola! Finished plotting...");            
+            System.Console.WriteLine("Viola! Finished plotting...");
         }
 
     }
