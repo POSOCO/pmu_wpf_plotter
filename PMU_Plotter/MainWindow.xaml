@@ -29,12 +29,11 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />                    
                 </Grid.RowDefinitions>
-                <TextBox Name="WelcomeText" Text="Hello World!" AcceptsReturn="True"></TextBox>
-                <Button Name="TestBtn" Grid.Row="1" Click="TestBtn_Click">Test</Button>
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="2" Name="MyChart" Zoom="Xy" Pan="Xy">
+                <Button Name="TestBtn" Click="TestBtn_Click">Test</Button>
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="1" Name="MyChart" Zoom="Xy" Pan="Xy">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
@@ -46,8 +45,12 @@
                         </lvc:Axis>
                     </lvc:CartesianChart.AxisX>
                 </lvc:CartesianChart>
+                <ScrollViewer CanContentScroll="False" Grid.Row="2"
+              VerticalScrollBarVisibility ="Auto" HorizontalScrollBarVisibility="Auto" MaxHeight="75">
+                    <TextBox Name="WelcomeText" Text="Hello World!" AcceptsReturn="True"></TextBox>
+                </ScrollViewer>
             </Grid>
         </ScrollViewer>
     </DockPanel>
-    
+
 </Window>

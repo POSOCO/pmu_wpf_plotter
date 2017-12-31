@@ -74,6 +74,10 @@
       <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
@@ -102,6 +106,7 @@
     <Compile Include="PhasorPointBinaryDataParser.cs" />
     <Compile Include="PhasorPointEndpointBehavior.cs" />
     <Compile Include="PhasorPointMessageInspector.cs" />
+    <Compile Include="PlotDataTemplate.cs" />
     <Compile Include="PMUMeasDataLists.cs" />
     <Compile Include="Service References\HistoryProvider\Reference.cs">
       <AutoGen>True</AutoGen>

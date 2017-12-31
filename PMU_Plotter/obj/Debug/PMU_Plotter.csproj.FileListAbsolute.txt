@@ -25,3 +25,5 @@ C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\Live
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.xml
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.Wpf.pdb
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\LiveCharts.Wpf.xml
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\bin\Debug\Newtonsoft.Json.xml

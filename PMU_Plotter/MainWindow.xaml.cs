@@ -17,6 +17,8 @@ using LiveCharts;
 using LiveCharts.Wpf;
 using System.ComponentModel;
 using LiveCharts.Defaults;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace PMU_Plotter
 {
@@ -32,7 +34,7 @@ namespace PMU_Plotter
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> XFormatter { get; set; }
         public List<DateTime> timeStamps_ { get; set; }
-        public int dataRate_ { get; set; }
+        PlotDataTemplate plotTemplate_;
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
         public MainWindow()
@@ -47,7 +49,7 @@ namespace PMU_Plotter
             _historyAdapter.Initialize(_configManager);
             SeriesCollection = new SeriesCollection();
             timeStamps_ = new List<DateTime>();
-            dataRate_ = 25;
+            plotTemplate_ = new PlotDataTemplate();
             xMin = double.NaN;
             xMax = double.NaN;
             //Labels = new string[0];
@@ -67,7 +69,7 @@ namespace PMU_Plotter
                     }
                     else
                     {
-                        timeStamp = startTimeStamp.AddSeconds(val / (double)dataRate_);
+                        timeStamp = startTimeStamp.AddSeconds(val / (double)plotTemplate_.dataRate);
                         if (timeStamp.Hour == 0 && timeStamp.Minute == 0 && timeStamp.Second == 0 && timeStamp.Millisecond == 0)
                         {
                             return timeStamp.ToString("dd-MM-yyyy");
@@ -92,7 +94,7 @@ namespace PMU_Plotter
             // MessageBox.Show("You clicked 'Open...'");
             OpenFileDialog openFileDialog = new OpenFileDialog();
             // openFileDialog.Multiselect = true;
-            openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
             if (openFileDialog.ShowDialog() == true)
             {
@@ -112,9 +114,9 @@ namespace PMU_Plotter
         {
             if (str != null)
             {
-                string[] lines = System.IO.File.ReadAllLines(str);
+                plotTemplate_ = JsonConvert.DeserializeObject<PlotDataTemplate>(File.ReadAllText(str));
                 // Display the file contents by using a foreach loop.
-                WelcomeText.Text = String.Join("\n", lines);
+                WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
             }
         }
 
@@ -124,9 +126,9 @@ namespace PMU_Plotter
             aboutWindow.Show();
         }
 
-        public void plotMeasIds(DateTime startTime, DateTime endTime, List<int> measurementIDs, int dataRate)
+        public void plotMeasIds(DateTime startTime, DateTime endTime)
         {
-            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs };
+            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = plotTemplate_.dataRate, measurementIDs = plotTemplate_.measIds, measurementNames = plotTemplate_.measurementNames };
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWork;
@@ -140,7 +142,12 @@ namespace PMU_Plotter
             DateTime startTime = DateTime.Now.AddDays(-1).AddSeconds(-3);
             DateTime endTime = DateTime.Now.AddDays(-1);
             List<int> measurementIDs = new List<int>() { 4924, 4929 };
-            plotMeasIds(startTime, endTime, measurementIDs, dataRate_);
+            if (plotTemplate_.measIds.Count == 0)
+            {
+                plotTemplate_.measIds.AddRange(new List<int>() { 4924, 4929 });
+                plotTemplate_.measurementNames.AddRange(new List<string>() { "meas1", "meas2" });
+            }
+            plotMeasIds(startTime, endTime);
         }
 
         // created by sudhir on 30.12.2017
@@ -153,12 +160,13 @@ namespace PMU_Plotter
             DateTime startTime = (DateTime)argument.GetType().GetProperty("startTime").GetValue(argument, null);
             DateTime endTime = (DateTime)argument.GetType().GetProperty("endTime").GetValue(argument, null);
             List<int> measurementIDs = (List<int>)argument.GetType().GetProperty("measurementIDs").GetValue(argument, null);
+            List<string> measurementNames = (List<string>)argument.GetType().GetProperty("measurementNames").GetValue(argument, null);
             ConfigurationManager _configManager = new ConfigurationManager();
             _configManager.Initialize();
             HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
             Dictionary<object, List<PMUDataStructure>> parsedData = _historyAdapter.GetData(startTime, endTime, measurementIDs, true, false, dataRate);
-            e.Result = new { parsedData = parsedData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs };
+            e.Result = new { parsedData = parsedData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames };
         }
 
         // created by sudhir on 30.12.2017
@@ -175,6 +183,7 @@ namespace PMU_Plotter
             object res = e.Result;
             Dictionary<object, List<PMUDataStructure>> parsedData = (Dictionary<object, List<PMUDataStructure>>)res.GetType().GetProperty("parsedData").GetValue(res, null);
             List<int> measurementIDs = (List<int>)res.GetType().GetProperty("measurementIDs").GetValue(res, null);
+            List<string> measurementNames = (List<string>)res.GetType().GetProperty("measurementNames").GetValue(res, null);
             int dataRate = (int)res.GetType().GetProperty("dataRate").GetValue(res, null);
             // SeriesCollection = new SeriesCollection();
             SeriesCollection.Clear();
@@ -187,13 +196,13 @@ namespace PMU_Plotter
                 // get 1st list and add to SeriesCollection
                 lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
                 timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-                SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
+                SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
 
                 // get the data of remaining measurements and add to SeriesCollection
                 for (int i = 1; i < measurementIDs.Count; i++)
                 {
                     lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
-                    SeriesCollection.Add(new LineSeries() { Title = measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
+                    SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
                 }
 
             }
