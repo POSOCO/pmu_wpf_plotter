@@ -57,7 +57,9 @@ namespace PMU_Plotter
                 {
                     DateTime startTimeStamp = timeStamps_.ElementAt(0);
                     DateTime timeStamp;
-
+                    timeStamp = startTimeStamp.AddSeconds(val / (double)plotTemplate_.dataRate);
+                    return timeStamp.ToString("HH:mm:ss.fff");
+                    /*
                     if (val == 0 || val == (double)(timeStamps_.Count - 1))
                     {
                         timeStamp = timeStamps_.ElementAt((int)val);
@@ -72,7 +74,7 @@ namespace PMU_Plotter
                         }
                         return timeStamp.ToString("HH:mm:ss.fff");
                     }
-
+                    */
                 }
                 return val.ToString();
             };
@@ -136,18 +138,22 @@ namespace PMU_Plotter
             if (mItem.Tag.ToString() == "ZXY")
             {
                 MyChart.Zoom = ZoomingOptions.Xy;
+                addLinesToConsole("Zoom mode set to XY");
             }
             else if (mItem.Tag.ToString() == "ZX")
             {
                 MyChart.Zoom = ZoomingOptions.X;
+                addLinesToConsole("Zoom mode set to X");
             }
             else if (mItem.Tag.ToString() == "ZY")
             {
                 MyChart.Zoom = ZoomingOptions.Y;
+                addLinesToConsole("Zoom mode set to Y");
             }
             else if (mItem.Tag.ToString() == "ZOff")
             {
                 MyChart.Zoom = ZoomingOptions.None;
+                addLinesToConsole("Zoom mode set to Off");
             }
         }
 
@@ -165,19 +171,24 @@ namespace PMU_Plotter
             if (mItem.Tag.ToString() == "PXY")
             {
                 MyChart.Pan = PanningOptions.Xy;
+                addLinesToConsole("Pan mode set to XY");
             }
             else if (mItem.Tag.ToString() == "PX")
             {
                 MyChart.Pan = PanningOptions.X;
+                addLinesToConsole("Pan mode set to X");
             }
             else if (mItem.Tag.ToString() == "PY")
             {
                 MyChart.Pan = PanningOptions.Y;
+                addLinesToConsole("Pan mode set to Y");
             }
             else if (mItem.Tag.ToString() == "POff")
             {
                 MyChart.Pan = PanningOptions.None;
+                addLinesToConsole("Pan mode set to None");
             }
+            
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
@@ -186,13 +197,13 @@ namespace PMU_Plotter
             MyChart.AxisX[0].MaxValue = double.NaN;
             MyChart.AxisY[0].MinValue = double.NaN;
             MyChart.AxisY[0].MaxValue = double.NaN;
-            // todo make it more procedural by function
-            WelcomeText.Text = "Reset Axis done...\n" + WelcomeText.Text;
+            addLinesToConsole("Reset Axis done...");
         }
 
         public void plotMeasIds(DateTime startTime, DateTime endTime)
         {
             object payLoad = new { startTime = startTime, endTime = endTime, dataRate = plotTemplate_.dataRate, measurementIDs = plotTemplate_.measIds, measurementNames = plotTemplate_.measurementNames };
+            addLinesToConsole("Started fetching data");
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWork;
@@ -203,7 +214,7 @@ namespace PMU_Plotter
 
         private void TestBtn_Click(object sender, RoutedEventArgs e)
         {
-            DateTime startTime = DateTime.Now.AddDays(-1).AddSeconds(-3);
+            DateTime startTime = DateTime.Now.AddDays(-1).AddMinutes(-1);
             DateTime endTime = DateTime.Now.AddDays(-1);
             List<int> measurementIDs = new List<int>() { 4924, 4929 };
             if (plotTemplate_.measIds.Count == 0)
@@ -244,6 +255,7 @@ namespace PMU_Plotter
         // worker thread completed stuff
         void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            addLinesToConsole("Finished fetching data");
             object res = e.Result;
             Dictionary<object, List<PMUDataStructure>> parsedData = (Dictionary<object, List<PMUDataStructure>>)res.GetType().GetProperty("parsedData").GetValue(res, null);
             List<int> measurementIDs = (List<int>)res.GetType().GetProperty("measurementIDs").GetValue(res, null);
@@ -260,17 +272,32 @@ namespace PMU_Plotter
                 // get 1st list and add to SeriesCollection
                 lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
                 timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-                SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
+                SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0});
 
                 // get the data of remaining measurements and add to SeriesCollection
                 for (int i = 1; i < measurementIDs.Count; i++)
                 {
                     lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
-                    SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1 });
+                    SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness= 0});
                 }
-
+                addLinesToConsole("Viola! Finished plotting");
             }
-            System.Console.WriteLine("Viola! Finished plotting...");
+            else if(parsedData == null)
+            {
+                addLinesToConsole("Unable to parse the fetched data...");
+            }
+            else if (measurementIDs.Count == 0)
+            {
+                addLinesToConsole("No measurement Ids to plot...");
+            }
+
+        }
+
+        public void addLinesToConsole(string str)
+        {
+            string consoleTxt = WelcomeText.Text;
+            // todo limit number of lines to 10
+            WelcomeText.Text = DateTime.Now.ToString() + ": " + str + "\n" + consoleTxt;
         }
 
     }
