@@ -38,17 +38,17 @@
                 </MenuItem>
                 <MenuItem Header="Reset" Click="Reset_Click"></MenuItem>
             </Menu>
-        </StackPanel>        
+        </StackPanel>
         <ScrollViewer Margin="5" CanContentScroll="False"
               VerticalScrollBarVisibility ="Auto" HorizontalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />                    
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Button Name="TestBtn" Click="TestBtn_Click">Test</Button>
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="1" Name="MyChart" Zoom="Xy" Pan="Xy">
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="1" Name="MyChart" Zoom="Xy" Pan="Xy" DisableAnimations="True" Hoverable="False" DataTooltip="{x:Null}">
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="Sales" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
                     </lvc:CartesianChart.AxisY>
