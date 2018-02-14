@@ -70,6 +70,10 @@
       <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LiveCharts.Geared, Version=1.2.8.2, Culture=neutral, PublicKeyToken=7292f245d14ab8bf, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.Geared.1.2.8.2\lib\net45\LiveCharts.Geared.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
       <Private>True</Private>
@@ -102,6 +106,9 @@
     </ApplicationDefinition>
     <Compile Include="BinaryData.cs" />
     <Compile Include="ConfigurationManager.cs" />
+    <Compile Include="GearedTest.xaml.cs">
+      <DependentUpon>GearedTest.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HistoryDataAdapter.cs" />
     <Compile Include="PhasorPointBinaryDataParser.cs" />
     <Compile Include="PhasorPointEndpointBehavior.cs" />
@@ -114,6 +121,10 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Page Include="AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GearedTest.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

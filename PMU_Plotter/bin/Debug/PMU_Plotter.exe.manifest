@@ -55,6 +55,18 @@
     </dependentAssembly>
   </dependency>
   <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LiveCharts.Geared.dll" size="85504">
+      <assemblyIdentity name="LiveCharts.Geared" version="1.2.8.2" publicKeyToken="7292F245D14AB8BF" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>4KhOjbNj5DBIN+iZDKyr5vXcrzwJQuMTC3CJWZgxVbk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
     <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LiveCharts.Wpf.dll" size="217600">
       <assemblyIdentity name="LiveCharts.Wpf" version="0.9.7.0" publicKeyToken="0BC1F845D1EBB8DF" language="neutral" processorArchitecture="msil" />
       <hash>
@@ -79,14 +91,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="180736">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="188416">
       <assemblyIdentity name="PMU_Plotter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>AILvdxZX13MTWLXstYprrhNP0Wbq3YwWCrDs5Q/dvBw=</dsig:DigestValue>
+        <dsig:DigestValue>t7+uaz8seR8hnx8KQaE50yZszVnzlsXvuFDP/7RcxSY=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

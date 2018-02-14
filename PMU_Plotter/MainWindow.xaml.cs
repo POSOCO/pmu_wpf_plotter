@@ -15,9 +15,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LiveCharts;
 using LiveCharts.Wpf;
+using LiveCharts.Geared;
 using System.ComponentModel;
 using LiveCharts.Defaults;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using System.IO;
 
 namespace PMU_Plotter
@@ -112,9 +113,11 @@ namespace PMU_Plotter
         {
             if (str != null)
             {
+                /*
                 plotTemplate_ = JsonConvert.DeserializeObject<PlotDataTemplate>(File.ReadAllText(str));
                 // Display the file contents by using a foreach loop.
                 WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
+                */
             }
         }
 
@@ -300,5 +303,11 @@ namespace PMU_Plotter
             WelcomeText.Text = DateTime.Now.ToString() + ": " + str + "\n" + consoleTxt;
         }
 
+        private void GearedTest_Click(object sender, RoutedEventArgs e)
+        {
+            GearedTest gearedTestWindow = new GearedTest();
+            gearedTestWindow.Show();
+
+        }
     }
 }
