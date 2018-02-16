@@ -115,6 +115,9 @@
     <Compile Include="PhasorPointMessageInspector.cs" />
     <Compile Include="PlotDataTemplate.cs" />
     <Compile Include="PMUMeasDataLists.cs" />
+    <Compile Include="PointsConfigWindow.xaml.cs">
+      <DependentUpon>PointsConfigWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Service References\HistoryProvider\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -143,6 +146,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PointsConfigWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

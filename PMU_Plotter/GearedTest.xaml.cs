@@ -33,6 +33,7 @@ namespace PMU_Plotter
         PlotDataTemplate plotTemplate_;
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
+        PointsConfigWindow configWindow;
 
         public GearedTest()
         {
@@ -297,6 +298,16 @@ namespace PMU_Plotter
         {
             MainWindow mainWindow = new MainWindow();
             mainWindow.Show();
+        }
+
+        private void ConfigBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (configWindow == null)
+            {
+                configWindow = new PointsConfigWindow();
+            }
+            configWindow.Show();
+            configWindow.Activate();
         }
     }
 }

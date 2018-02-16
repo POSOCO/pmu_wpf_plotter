@@ -7,7 +7,7 @@
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:geared="clr-namespace:LiveCharts.Geared;assembly=LiveCharts.Geared"
         mc:Ignorable="d"
-        Title="GearedTest" Height="600" Width="900">
+        Title="Plot PMU Values" Height="600" Width="900">
     <Window.Resources>
         <Style x:Key="ButtonStyle" 
                TargetType="{x:Type Button}">            
@@ -59,7 +59,8 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <Button Name="TestBtn" Click="TestBtn_Click" Style="{StaticResource ButtonStyle}" >Test 10,000 points</Button>
-                    <Button Name="FetchPointsBtn" Click="FetchBtn_Click" Style="{StaticResource ButtonStyle}" >Fetch Points Data</Button>                    
+                    <Button Name="FetchPointsBtn" Click="FetchBtn_Click" Style="{StaticResource ButtonStyle}" >Fetch Points Data</Button>
+                    <Button Name="ConfigPointsBtn" Click="ConfigBtn_Click" Style="{StaticResource ButtonStyle}" >Configure Points</Button>
                 </StackPanel>
                 <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="1" Name="MyChart" Zoom="Xy" Pan="Xy" DisableAnimations="True" Hoverable="False" DataTooltip="{x:Null}">
                     <lvc:CartesianChart.AxisY>
