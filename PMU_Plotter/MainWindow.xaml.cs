@@ -18,7 +18,7 @@ using LiveCharts.Wpf;
 using LiveCharts.Geared;
 using System.ComponentModel;
 using LiveCharts.Defaults;
-//using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System.IO;
 
 namespace PMU_Plotter
@@ -113,11 +113,9 @@ namespace PMU_Plotter
         {
             if (str != null)
             {
-                /*
                 plotTemplate_ = JsonConvert.DeserializeObject<PlotDataTemplate>(File.ReadAllText(str));
                 // Display the file contents by using a foreach loop.
                 WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
-                */
             }
         }
 
@@ -191,7 +189,7 @@ namespace PMU_Plotter
                 MyChart.Pan = PanningOptions.None;
                 addLinesToConsole("Pan mode set to None");
             }
-            
+
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
@@ -275,17 +273,17 @@ namespace PMU_Plotter
                 // get 1st list and add to SeriesCollection
                 lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
                 timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-                SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0});
+                SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
 
                 // get the data of remaining measurements and add to SeriesCollection
                 for (int i = 1; i < measurementIDs.Count; i++)
                 {
                     lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
-                    SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness= 0});
+                    SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
                 }
                 addLinesToConsole("Viola! Finished plotting");
             }
-            else if(parsedData == null)
+            else if (parsedData == null)
             {
                 addLinesToConsole("Unable to parse the fetched data...");
             }
