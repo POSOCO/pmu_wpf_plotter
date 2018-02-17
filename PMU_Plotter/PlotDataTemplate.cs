@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PMU_Plotter
 {
-    class PlotDataTemplate
+    public class PlotDataTemplate
     {
         public List<int> measIds { get; set; }
         public List<String> measurementNames { get; set; }

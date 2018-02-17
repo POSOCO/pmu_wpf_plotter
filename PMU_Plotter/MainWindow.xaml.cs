@@ -99,7 +99,6 @@ namespace PMU_Plotter
             {
                 string filename = openFileDialog.FileNames[0];
                 openFileName(filename);
-
             }
         }
 
