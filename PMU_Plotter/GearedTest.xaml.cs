@@ -38,8 +38,15 @@ namespace PMU_Plotter
         public GearedTest()
         {
             InitializeComponent();
-            plotTemplate_ = new PlotDataTemplate();
             addLinesToConsole("Welcome User!");
+
+            plotTemplate_ = new PlotDataTemplate();
+
+            _configManager = new ConfigurationManager();
+            _configManager.Initialize();
+            _historyAdapter = new HistoryDataAdapter();
+            _historyAdapter.Initialize(_configManager);
+            
             String str = (String)((App)Application.Current).Properties["ArbitraryArgName"];
             openFileName(str);
             SeriesCollection = new SeriesCollection();
