@@ -38,6 +38,7 @@ namespace PMU_Plotter
         public GearedTest()
         {
             InitializeComponent();
+            plotTemplate_ = new PlotDataTemplate();
             addLinesToConsole("Welcome User!");
             String str = (String)((App)Application.Current).Properties["ArbitraryArgName"];
             openFileName(str);
@@ -87,7 +88,59 @@ namespace PMU_Plotter
             {
                 string filename = openFileDialog.FileNames[0];
                 openFileName(filename);
+                if (filename != null)
+                {
+                    ((App)Application.Current).Properties["ArbitraryArgName"] = filename;
+                }
+            }
+        }
 
+        private void SaveCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            // get the filename
+            if (MessageBox.Show("Save this Template?", "Save", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                string filename = (String)((App)Application.Current).Properties["ArbitraryArgName"];
+                if (filename != null)
+                {
+                    string jsonText = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
+                    File.WriteAllText(filename, jsonText);
+                    addLinesToConsole("Saved the updated template file!!!");
+                }
+                else
+                {
+                    // open save as window
+                    SaveAs_Click(this, null);
+                }
+            }
+        }
+
+        private void SaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = (String)((App)Application.Current).Properties["ArbitraryArgName"];
+            if (filename == null)
+            {
+                filename = String.Format("pmu_plot_template_{0}.json", DateTime.Now.ToString("dd.MM.yyyy_HH.mm.ss"));
+            }
+            string jsonText = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
+            SaveFileDialog savefileDialog = new SaveFileDialog();
+            // set a default file name
+            savefileDialog.FileName = filename;
+            // set filters - this can be done in properties as well
+            savefileDialog.Filter = "JSON Files (*.json)|*.json|All files (*.*)|*.*";
+            if (savefileDialog.ShowDialog() == true)
+            {
+                File.WriteAllText(savefileDialog.FileName, jsonText);
+                addLinesToConsole("Saved the updated template file!!!");
+                if (savefileDialog.FileName != null)
+                {
+                    ((App)Application.Current).Properties["ArbitraryArgName"] = savefileDialog.FileName;
+                }
             }
         }
 
@@ -112,9 +165,24 @@ namespace PMU_Plotter
         private void FetchBtn_Click(object sender, RoutedEventArgs e)
         {
             // fetch the points data from plotTemplate_ and plot them
-            DateTime startTime = DateTime.Now.AddDays(-1).AddMinutes(-1);
-            DateTime endTime = DateTime.Now.AddDays(-1);
-            List<int> measurementIDs = new List<int>() { 4924, 4929 };
+            DateTime startTime = DateTime.Now;
+            DateTime endTime = DateTime.Now;
+            if (plotTemplate_.startDateMode == "variable")
+            {
+                startTime = startTime.AddHours(plotTemplate_.startDateVariable.hours * -1);
+                startTime = startTime.AddMinutes(plotTemplate_.startDateVariable.mins * -1);
+                startTime = startTime.AddSeconds(plotTemplate_.startDateVariable.secs * -1);
+            }
+            else { startTime = plotTemplate_.startDateTime; }
+
+            if (plotTemplate_.endDateMode == "variable")
+            {
+                endTime = endTime.AddHours(plotTemplate_.endDateVariable.hours * -1);
+                endTime = endTime.AddMinutes(plotTemplate_.endDateVariable.mins * -1);
+                endTime = endTime.AddSeconds(plotTemplate_.endDateVariable.secs * -1);
+            }
+            else { endTime = plotTemplate_.endDateTime; }
+
             if (plotTemplate_.measIds.Count == 0)
             {
                 plotTemplate_.measIds.AddRange(new List<int>() { 4924, 4929 });
@@ -306,8 +374,25 @@ namespace PMU_Plotter
             {
                 configWindow = new PointsConfigWindow();
             }
+            else if (configWindow.IsLoaded == false)
+            {
+                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/c521ac47-7326-483a-be60-42de0e355711/how-can-a-method-of-a-wpf-window-find-out-if-the-window-is-closed-?forum=wpf
+                configWindow.Close();
+                configWindow = new PointsConfigWindow();
+            }
+            configWindow.NewMessage += MessageReceived;
+            configWindow.setDataTemplate(plotTemplate_);
             configWindow.Show();
             configWindow.Activate();
+        }
+        void MessageReceived(object sender, ConfigMessageEventArgs e)
+        {
+            PointsConfigWindow configWin = sender as PointsConfigWindow;
+            if (configWin != null)
+            {
+                // change the plot Data Template as per the window message
+                this.plotTemplate_ = e.dataTemplate;
+            }
         }
     }
 }

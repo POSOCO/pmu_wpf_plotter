@@ -32,3 +32,4 @@ C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\Gear
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\GearedTest.baml
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\PointsConfigWindow.g.cs
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\PointsConfigWindow.baml
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\GeneratedInternalTypeHelper.g.cs

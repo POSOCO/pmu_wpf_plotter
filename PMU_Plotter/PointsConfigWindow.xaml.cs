@@ -24,6 +24,7 @@ namespace PMU_Plotter
     /// </summary>
     public partial class PointsConfigWindow : Window
     {
+        public event EventHandler<ConfigMessageEventArgs> NewMessage;
         public MeasurementsVM measurementsVM = new MeasurementsVM();
         public PointsConfigWindow()
         {
@@ -31,7 +32,12 @@ namespace PMU_Plotter
             ConfigForm.DataContext = measurementsVM;
         }
 
-        private void PreviewNumericTextInput(object sender, TextCompositionEventArgs e)
+        public void setDataTemplate(PlotDataTemplate template)
+        {
+            measurementsVM.PlotTemplate = template;
+        }
+
+        private void PreviewIntegerTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text);
         }
@@ -84,7 +90,7 @@ namespace PMU_Plotter
         {
             public event PropertyChangedEventHandler PropertyChanged;
 
-            public void NotifyPropertyChanged(string propertyName = "")
+            public void NotifyPropertyChanged(string propertyName)
             {
                 if (PropertyChanged != null)
                 {
@@ -99,9 +105,39 @@ namespace PMU_Plotter
                 plotTemplate_.dataRate = 25;
                 plotTemplate_.measIds = new List<int> { 1, 2, 3 };
                 plotTemplate_.measurementNames = new List<string> { "One", "Two", "Three" };
+                PlotTemplate = plotTemplate_;
             }
 
             public PlotDataTemplate plotTemplate_ { get; set; }
+            public PlotDataTemplate PlotTemplate
+            {
+                get { return plotTemplate_; }
+                set
+                {
+                    plotTemplate_ = value;
+                    NotifyPropertyChanged("dataSetName");
+                    NotifyPropertyChanged("dataRate");
+                    NotifyPropertyChanged("StartDateMode");
+                    NotifyPropertyChanged("StartDateModeStr");
+                    NotifyPropertyChanged("StartDate");
+                    NotifyPropertyChanged("StartTimeHoursIndex");
+                    NotifyPropertyChanged("StartTimeMinsIndex");
+                    NotifyPropertyChanged("StartTimeSecsIndex");
+                    NotifyPropertyChanged("StartHoursVariable");
+                    NotifyPropertyChanged("StartMinsVariable");
+                    NotifyPropertyChanged("StartSecsVariable");
+                    NotifyPropertyChanged("EndDateMode");
+                    NotifyPropertyChanged("EndDateModeStr");
+                    NotifyPropertyChanged("EndDate");
+                    NotifyPropertyChanged("EndTimeHoursIndex");
+                    NotifyPropertyChanged("EndTimeMinsIndex");
+                    NotifyPropertyChanged("EndTimeSecsIndex");
+                    NotifyPropertyChanged("EndHoursVariable");
+                    NotifyPropertyChanged("EndMinsVariable");
+                    NotifyPropertyChanged("EndSecsVariable");
+                    NotifyPropertyChanged("measurements");
+                }
+            }
             public string dataSetName
             {
                 get
@@ -126,17 +162,126 @@ namespace PMU_Plotter
             }
             public List<string> hourStrings { get; set; } = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" };
             public List<string> minuteStrings { get; set; } = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59" };
+
             public List<string> dateLimitsModes { get; set; } = new List<string> { "variable", "absolute" };
-            public int dateLimitsModeSelection = 0;
-            public int DateLimitsModeSelection { get { return dateLimitsModeSelection; } set { dateLimitsModeSelection = value; plotTemplate_.dateLimitsMode = dateLimitsModes.ElementAt(dateLimitsModeSelection); } }
-            public DateTime StartDate { get; set; } = DateTime.Now;
-            public int StartTimeHoursIndex { get; set; } = 0;
-            public int StartTimeMinsIndex { get; set; } = 0;
-            public int StartTimeSecsIndex { get; set; } = 0;
-            public int EndTimeHoursIndex { get; set; } = 0;
-            public int EndTimeMinsIndex { get; set; } = 0;
-            public int EndTimeSecsIndex { get; set; } = 0;
-            public DateTime EndDate { get; set; } = DateTime.Now;
+
+            public int StartDateMode { get { return dateLimitsModes.IndexOf(plotTemplate_.startDateMode); } set { plotTemplate_.startDateMode = dateLimitsModes.ElementAt(value); NotifyPropertyChanged("StartDateModeStr"); } }
+            public string StartDateModeStr
+            {
+                get { return plotTemplate_.startDateMode; }
+                set
+                {
+                    int modeInt = dateLimitsModes.IndexOf(value);
+                    if (modeInt != -1)
+                    {
+                        plotTemplate_.startDateMode = value;
+                    }
+                }
+            }
+
+            public DateTime StartDate { get { return plotTemplate_.startDateTime; } set { plotTemplate_.startDateTime = value; } }
+            public int StartTimeHoursIndex { get { return plotTemplate_.startDateTime.Hour; } set { plotTemplate_.startDateTime = new DateTime(plotTemplate_.startDateTime.Year, plotTemplate_.startDateTime.Month, plotTemplate_.startDateTime.Day, value, plotTemplate_.startDateTime.Minute, plotTemplate_.startDateTime.Second); } }
+            public int StartTimeMinsIndex { get { return plotTemplate_.startDateTime.Minute; } set { plotTemplate_.startDateTime = new DateTime(plotTemplate_.startDateTime.Year, plotTemplate_.startDateTime.Month, plotTemplate_.startDateTime.Day, plotTemplate_.startDateTime.Hour, value, plotTemplate_.startDateTime.Second); } }
+            public int StartTimeSecsIndex { get { return plotTemplate_.startDateTime.Second; } set { plotTemplate_.startDateTime = new DateTime(plotTemplate_.startDateTime.Year, plotTemplate_.startDateTime.Month, plotTemplate_.startDateTime.Day, plotTemplate_.startDateTime.Hour, plotTemplate_.startDateTime.Minute, value); } }
+
+            public string StartHoursVariable
+            {
+                get { return plotTemplate_.startDateVariable.hours.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.startDateVariable.hours;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.startDateVariable.hours = doubleVal;
+                    }
+                }
+            }
+
+            public string StartMinsVariable
+            {
+                get { return plotTemplate_.startDateVariable.mins.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.startDateVariable.mins;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.startDateVariable.mins = doubleVal;
+                    }
+                }
+            }
+
+            public string StartSecsVariable
+            {
+                get { return plotTemplate_.startDateVariable.secs.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.startDateVariable.secs;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.startDateVariable.secs = doubleVal;
+                    }
+                }
+            }
+
+            public string EndHoursVariable
+            {
+                get { return plotTemplate_.endDateVariable.hours.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.endDateVariable.hours;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.endDateVariable.hours = doubleVal;
+                    }
+                }
+            }
+
+            public string EndMinsVariable
+            {
+                get { return plotTemplate_.endDateVariable.mins.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.endDateVariable.mins;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.endDateVariable.mins = doubleVal;
+                    }
+                }
+            }
+
+            public string EndSecsVariable
+            {
+                get { return plotTemplate_.endDateVariable.secs.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.endDateVariable.secs;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.endDateVariable.secs = doubleVal;
+                    }
+                }
+            }
+
+            public int EndDateMode { get { return dateLimitsModes.IndexOf(plotTemplate_.endDateMode); } set { plotTemplate_.endDateMode = dateLimitsModes.ElementAt(value); NotifyPropertyChanged("EndDateModeStr"); } }
+            public string EndDateModeStr
+            {
+                get { return plotTemplate_.endDateMode; }
+                set
+                {
+                    int modeInt = dateLimitsModes.IndexOf(value);
+                    if (modeInt != -1)
+                    {
+                        plotTemplate_.endDateMode = value;
+                    }
+
+                }
+            }
+
+            public DateTime EndDate { get { return plotTemplate_.endDateTime; } set { plotTemplate_.endDateTime = value; } }
+            public int EndTimeHoursIndex { get { return plotTemplate_.endDateTime.Hour; } set { plotTemplate_.endDateTime = new DateTime(plotTemplate_.endDateTime.Year, plotTemplate_.endDateTime.Month, plotTemplate_.endDateTime.Day, value, plotTemplate_.endDateTime.Minute, plotTemplate_.endDateTime.Second); } }
+            public int EndTimeMinsIndex { get { return plotTemplate_.endDateTime.Minute; } set { plotTemplate_.endDateTime = new DateTime(plotTemplate_.endDateTime.Year, plotTemplate_.endDateTime.Month, plotTemplate_.endDateTime.Day, plotTemplate_.endDateTime.Hour, value, plotTemplate_.endDateTime.Second); } }
+            public int EndTimeSecsIndex { get { return plotTemplate_.endDateTime.Second; } set { plotTemplate_.endDateTime = new DateTime(plotTemplate_.endDateTime.Year, plotTemplate_.endDateTime.Month, plotTemplate_.endDateTime.Day, plotTemplate_.endDateTime.Hour, plotTemplate_.endDateTime.Minute, value); } }
+
             public List<int> measIds { get { return plotTemplate_.measIds; } set { plotTemplate_.measIds = value; } }
             public List<String> measurementNames { get { return plotTemplate_.measurementNames; } set { plotTemplate_.measurementNames = value; } }
             public List<String> measurements
@@ -153,7 +298,7 @@ namespace PMU_Plotter
             }
         }
 
-        private void SaveTemplate(object sender, RoutedEventArgs e)
+        private void ExportTemplate(object sender, RoutedEventArgs e)
         {
             string jsonText = JsonConvert.SerializeObject(measurementsVM.plotTemplate_, Formatting.Indented);
             SaveFileDialog savefileDialog = new SaveFileDialog();
@@ -167,6 +312,80 @@ namespace PMU_Plotter
                 File.WriteAllText(savefileDialog.FileName, jsonText);
                 MessageBox.Show("Exported the template JSON File!!!");
             }
+        }
+
+        private void SaveTemplate(object sender, RoutedEventArgs e)
+        {
+            // todo save the underlying file also
+            if (NewMessage != null)
+            {
+                NewMessage(this, new ConfigMessageEventArgs(measurementsVM.plotTemplate_));
+            }
+        }
+    }
+
+    public class ConfigMessageEventArgs : EventArgs
+    {
+        public ConfigMessageEventArgs(PlotDataTemplate dataTemplate)
+        {
+            this.dataTemplate = dataTemplate;
+        }
+        public PlotDataTemplate dataTemplate { get; set; }
+    }
+
+    public class IsVariableDateVisibleConverter : IValueConverter
+    {
+        public IsVariableDateVisibleConverter() { }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string modeString = (string)value;
+            if (modeString == "variable")
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Visibility visibility = (Visibility)value;
+
+            if (visibility == Visibility.Visible)
+                return "variable";
+            else
+                return "absolute";
+        }
+    }
+
+    public class IsAbsoluteDateVisibleConverter : IValueConverter
+    {
+        public IsAbsoluteDateVisibleConverter() { }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string modeString = (string)value;
+            if (modeString == "absolute")
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                return Visibility.Collapsed;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Visibility visibility = (Visibility)value;
+
+            if (visibility == Visibility.Visible)
+                return "absolute";
+            else
+                return "variable";
         }
     }
 }

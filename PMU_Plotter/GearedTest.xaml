@@ -17,6 +17,7 @@
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="Open" CanExecute="OpenCommand_CanExecute" Executed="OpenCommand_Executed" />
+        <CommandBinding Command="Save" CanExecute="SaveCommand_CanExecute" Executed="SaveCommand_Executed" />
     </Window.CommandBindings>
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
@@ -25,6 +26,9 @@
                     <MenuItem Command="Open"/>
                     <Separator />
                     <MenuItem Header="_Exit" Click="Exit_Click"/>
+                    <Separator />
+                    <MenuItem Command="Save"/>
+                    <MenuItem Header="SaveAs" Click="SaveAs_Click"/>
                 </MenuItem>
                 <MenuItem Header="_Edit" />
                 <MenuItem Header="_View">
