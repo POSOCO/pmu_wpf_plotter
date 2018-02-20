@@ -46,7 +46,7 @@ namespace PMU_Plotter
             _configManager.Initialize();
             _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
-            
+
             String str = (String)((App)Application.Current).Properties["FilePathArgName"];
             openFileName(str);
             SeriesCollection = new SeriesCollection();
@@ -200,7 +200,7 @@ namespace PMU_Plotter
 
         public void plotMeasIds(DateTime startTime, DateTime endTime)
         {
-            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = plotTemplate_.dataRate, measurementIDs = plotTemplate_.measIds, measurementNames = plotTemplate_.measurementNames };
+            object payLoad = new { startTime = startTime, endTime = endTime, dataRate = plotTemplate_.dataRate, measurementIDs = plotTemplate_.measIds, measurementNames = plotTemplate_.measurementNames, fetchWindow = plotTemplate_.fetchWindow };
             addLinesToConsole("Started fetching data");
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
@@ -221,10 +221,38 @@ namespace PMU_Plotter
             DateTime endTime = (DateTime)argument.GetType().GetProperty("endTime").GetValue(argument, null);
             List<int> measurementIDs = (List<int>)argument.GetType().GetProperty("measurementIDs").GetValue(argument, null);
             List<string> measurementNames = (List<string>)argument.GetType().GetProperty("measurementNames").GetValue(argument, null);
+            VariableTime fetchWindow = (VariableTime)argument.GetType().GetProperty("fetchWindow").GetValue(argument, null);
             ConfigurationManager _configManager = new ConfigurationManager();
             _configManager.Initialize();
             HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
+            int numWindows = 1;
+            // find the number of seconds in a fetch window
+            //stub
+            int reportFetchWindowSecs = (int)(fetchWindow.hours * 60 * 60 + fetchWindow.mins * 60 + fetchWindow.secs);
+            if (reportFetchWindowSecs <= 0)
+            {
+                numWindows = 1;
+            }
+            else
+            {
+                // find the number of fetch windows as Ceil(Fetchspan/windowspan)
+                int reportfetchSpanSecs = Convert.ToInt32(Math.Ceiling((endTime - startTime).TotalSeconds));
+                numWindows = reportfetchSpanSecs / reportFetchWindowSecs;
+            }
+
+            // fetch and update the 1st window
+            DateTime fetchStartTime = startTime;
+            DateTime fetchEndTime = fetchStartTime.AddSeconds(reportFetchWindowSecs);
+            if (fetchEndTime > endTime)
+            {
+                fetchEndTime = endTime;
+            }
+            if (dataRate <= 0 || dataRate > 25)
+            {
+                // default dataRate of PMU
+                dataRate = 25;
+            }
             Dictionary<object, List<PMUDataStructure>> parsedData = _historyAdapter.GetData(startTime, endTime, measurementIDs, true, false, dataRate);
             e.Result = new { parsedData = parsedData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames };
         }
