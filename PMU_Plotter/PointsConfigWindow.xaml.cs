@@ -282,6 +282,45 @@ namespace PMU_Plotter
             public int EndTimeMinsIndex { get { return plotTemplate_.endDateTime.Minute; } set { plotTemplate_.endDateTime = new DateTime(plotTemplate_.endDateTime.Year, plotTemplate_.endDateTime.Month, plotTemplate_.endDateTime.Day, plotTemplate_.endDateTime.Hour, value, plotTemplate_.endDateTime.Second); } }
             public int EndTimeSecsIndex { get { return plotTemplate_.endDateTime.Second; } set { plotTemplate_.endDateTime = new DateTime(plotTemplate_.endDateTime.Year, plotTemplate_.endDateTime.Month, plotTemplate_.endDateTime.Day, plotTemplate_.endDateTime.Hour, plotTemplate_.endDateTime.Minute, value); } }
 
+            public string FetchWindowHrs
+            {
+                get { return plotTemplate_.fetchWindow.hours.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.fetchWindow.hours;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.fetchWindow.hours = doubleVal;
+                    }
+                }
+            }
+
+            public string FetchWindowMins
+            {
+                get { return plotTemplate_.fetchWindow.mins.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.fetchWindow.mins;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.fetchWindow.mins = doubleVal;
+                    }
+                }
+            }
+
+            public string FetchWindowSecs
+            {
+                get { return plotTemplate_.fetchWindow.secs.ToString(); }
+                set
+                {
+                    double doubleVal = plotTemplate_.fetchWindow.secs;
+                    if (double.TryParse(value, out doubleVal))
+                    {
+                        plotTemplate_.fetchWindow.secs = doubleVal;
+                    }
+                }
+            }
+
             public List<int> measIds { get { return plotTemplate_.measIds; } set { plotTemplate_.measIds = value; } }
             public List<String> measurementNames { get { return plotTemplate_.measurementNames; } set { plotTemplate_.measurementNames = value; } }
             public List<String> measurements

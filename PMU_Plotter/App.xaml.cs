@@ -17,7 +17,7 @@ namespace PMU_Plotter
         protected override void OnStartup(StartupEventArgs e)
         {
             // https://stackoverflow.com/questions/26845815/how-to-pass-file-as-parameter-to-your-program-wpf-c-sharp
-            this.Properties["ArbitraryArgName"] = null;
+            this.Properties["FilePathArgName"] = null;
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
@@ -28,10 +28,10 @@ namespace PMU_Plotter
                     var extension = Path.GetExtension(fileName);
                     if (extension == ".sudhir")
                     {
-                        this.Properties["ArbitraryArgName"] = fileName;
+                        this.Properties["FilePathArgName"] = fileName;
                     }
                     */
-                    this.Properties["ArbitraryArgName"] = fileName;
+                    this.Properties["FilePathArgName"] = fileName;
                 }
             }
             base.OnStartup(e);

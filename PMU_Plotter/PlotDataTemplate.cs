@@ -18,6 +18,7 @@ namespace PMU_Plotter
         public DateTime endDateTime { get; set; }
         public VariableTime endDateVariable { get; set; }
         public int dataRate { get; set; }
+        public VariableTime fetchWindow { get; set; }
 
         public PlotDataTemplate()
         {
@@ -31,6 +32,7 @@ namespace PMU_Plotter
             endDateTime = DateTime.Now;
             endDateVariable = new VariableTime();
             dataRate = 25;
+            fetchWindow = new VariableTime();
         }
     }
 

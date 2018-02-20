@@ -22,6 +22,7 @@
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
             <RowDefinition Height = "Auto" />
+            <RowDefinition Height = "Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row = "0" Grid.Column = "0" Text = "Template Name" Margin = "5"  
@@ -30,7 +31,17 @@
         <TextBlock Grid.Row = "1" Grid.Column = "0" Text = "Data Rate" Margin = "5"  
          HorizontalAlignment = "Left" VerticalAlignment = "Center" Width = "100" />
         <TextBox Grid.Row = "1" Grid.Column = "1" Margin = "5" MaxLines="1" Text="{Binding dataRate, Mode=TwoWay}" PreviewTextInput="PreviewIntegerTextInput"/>
-        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
+        <TextBlock Grid.Row = "2" Grid.Column = "0" Text = "Fetch Window" Margin = "5"  
+         HorizontalAlignment = "Left" VerticalAlignment = "Center" Width = "100" />
+        <StackPanel Grid.Row = "2" Grid.Column = "1" Orientation="Horizontal" Visibility="{Binding EndDateModeStr, Converter={StaticResource IsVariableDateVisibleConverter}}">
+            <TextBox Name="FetchWindowHrsInput" Text="{Binding FetchWindowHrs, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
+            <TextBlock Text="Hrs |" Margin="5"></TextBlock>
+            <TextBox Name="FetchWindowMinsInput" Text="{Binding FetchWindowMins, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
+            <TextBlock Text="Mins |" Margin="5"></TextBlock>
+            <TextBox Name="FetchWindowSecsInput" Text="{Binding FetchWindowSecs, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
+            <TextBlock Text="Secs |" Margin="5"></TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel>
                 <TextBlock Text="Measurements List" Margin="5"></TextBlock>
                 <ListBox Margin="5" Name="MeasurementsListBox" ItemsSource="{Binding measurements}">
@@ -45,7 +56,7 @@
                 <Button Content="Remove Selected Meas." Click="DeleteMeasurement" Margin="5" ></Button>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5" Orientation="Horizontal" HorizontalAlignment="Left">
+        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5" Orientation="Horizontal" HorizontalAlignment="Left">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="5">
                     <TextBlock Text="New Meas. Id" Width="100"></TextBlock>
@@ -58,7 +69,7 @@
                 <Button Content="Add Measurement" Click="AddNewMeasurement" Margin="5"></Button>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="3" Grid.Column="0">
+        <StackPanel Grid.Row="4" Grid.Column="0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Start Time Mode" Margin="5"></TextBlock>
                 <ComboBox Name="StartDateModesComboBox" SelectedIndex="{Binding StartDateMode, Mode=TwoWay}" ItemsSource="{Binding dateLimitsModes}" Margin="5">
@@ -103,14 +114,14 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Visibility="{Binding StartDateModeStr, Converter={StaticResource IsVariableDateVisibleConverter}}">
                 <TextBox Name="StartTimeVarHrsInput" Text="{Binding StartHoursVariable, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
-                <TextBlock Text="Hrs" Margin="5"></TextBlock>
+                <TextBlock Text="Hrs |" Margin="5"></TextBlock>
                 <TextBox Name="StartTimeVarMinsInput" Text="{Binding StartMinsVariable, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
-                <TextBlock Text="Mins" Margin="5"></TextBlock>
+                <TextBlock Text="Mins |" Margin="5"></TextBlock>
                 <TextBox Name="StartTimeVarSecsInput" Text="{Binding StartSecsVariable, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
-                <TextBlock Text="Secs" Margin="5"></TextBlock>
+                <TextBlock Text="Secs |" Margin="5"></TextBlock>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="3" Grid.Column="1">
+        <StackPanel Grid.Row="4" Grid.Column="1">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="End Time Mode" Margin="5"></TextBlock>
                 <ComboBox Name="EndDateModesComboBox" SelectedIndex="{Binding EndDateMode, Mode=TwoWay}" ItemsSource="{Binding dateLimitsModes}" Margin="5">
@@ -155,16 +166,16 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Visibility="{Binding EndDateModeStr, Converter={StaticResource IsVariableDateVisibleConverter}}">
                 <TextBox Name="EndTimeVarHrsInput" Text="{Binding EndHoursVariable, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
-                <TextBlock Text="Hrs" Margin="5"></TextBlock>
+                <TextBlock Text="Hrs |" Margin="5"></TextBlock>
                 <TextBox Name="EndTimeVarMinsInput" Text="{Binding EndMinsVariable, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
-                <TextBlock Text="Mins" Margin="5"></TextBlock>
+                <TextBlock Text="Mins |" Margin="5"></TextBlock>
                 <TextBox Name="EndTimeVarSecsInput" Text="{Binding EndSecsVariable, Mode=TwoWay}" Margin="5" MinWidth="40"></TextBox>
-                <TextBlock Text="Secs" Margin="5"></TextBlock>
+                <TextBlock Text="Secs |" Margin="5"></TextBlock>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="4" Margin="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" >
+        <StackPanel Grid.Row="5" Margin="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" >
             <Button Content="Export this Template" Click="ExportTemplate" Margin="5"></Button>
-            <Button Content="Save Changes" Click="SaveTemplate" Margin="5"></Button>            
+            <Button Content="Save Changes" Click="SaveTemplate" Margin="5"></Button>
         </StackPanel>
     </Grid>
 

@@ -91,14 +91,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="216064">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PMU_Plotter.exe" size="218112">
       <assemblyIdentity name="PMU_Plotter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>Ex+hv9R2gM6HWUZY74BJiNNDy7DiSix1AQdGuKbny1k=</dsig:DigestValue>
+        <dsig:DigestValue>F/TqT+VzkWYk8/ASWI6Af68EOhf+NXio/KYwFACpH2M=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

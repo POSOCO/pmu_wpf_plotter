@@ -47,7 +47,7 @@ namespace PMU_Plotter
             _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
             
-            String str = (String)((App)Application.Current).Properties["ArbitraryArgName"];
+            String str = (String)((App)Application.Current).Properties["FilePathArgName"];
             openFileName(str);
             SeriesCollection = new SeriesCollection();
             timeStamps_ = new List<DateTime>();
@@ -97,7 +97,7 @@ namespace PMU_Plotter
                 openFileName(filename);
                 if (filename != null)
                 {
-                    ((App)Application.Current).Properties["ArbitraryArgName"] = filename;
+                    ((App)Application.Current).Properties["FilePathArgName"] = filename;
                 }
             }
         }
@@ -112,7 +112,7 @@ namespace PMU_Plotter
             // get the filename
             if (MessageBox.Show("Save this Template?", "Save", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                string filename = (String)((App)Application.Current).Properties["ArbitraryArgName"];
+                string filename = (String)((App)Application.Current).Properties["FilePathArgName"];
                 if (filename != null)
                 {
                     string jsonText = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
@@ -129,7 +129,7 @@ namespace PMU_Plotter
 
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
-            string filename = (String)((App)Application.Current).Properties["ArbitraryArgName"];
+            string filename = (String)((App)Application.Current).Properties["FilePathArgName"];
             if (filename == null)
             {
                 filename = String.Format("pmu_plot_template_{0}.json", DateTime.Now.ToString("dd.MM.yyyy_HH.mm.ss"));
@@ -146,7 +146,7 @@ namespace PMU_Plotter
                 addLinesToConsole("Saved the updated template file!!!");
                 if (savefileDialog.FileName != null)
                 {
-                    ((App)Application.Current).Properties["ArbitraryArgName"] = savefileDialog.FileName;
+                    ((App)Application.Current).Properties["FilePathArgName"] = savefileDialog.FileName;
                 }
             }
         }
@@ -214,6 +214,7 @@ namespace PMU_Plotter
         // Todo stub implement piecewise fetching here like that of on demand fetch
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            // todo refer template manager for for doing the piecewise fetch
             object argument = e.Argument;
             int dataRate = (int)argument.GetType().GetProperty("dataRate").GetValue(argument, null);
             DateTime startTime = (DateTime)argument.GetType().GetProperty("startTime").GetValue(argument, null);

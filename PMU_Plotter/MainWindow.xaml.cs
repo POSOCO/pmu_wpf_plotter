@@ -39,7 +39,7 @@ namespace PMU_Plotter
         public MainWindow()
         {
             InitializeComponent();
-            String str = (String)((App)Application.Current).Properties["ArbitraryArgName"];
+            String str = (String)((App)Application.Current).Properties["FilePathArgName"];
             openFileName(str);
 
             _configManager = new ConfigurationManager();
