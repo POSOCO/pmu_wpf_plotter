@@ -222,10 +222,21 @@ namespace PMU_Plotter
             List<int> measurementIDs = (List<int>)argument.GetType().GetProperty("measurementIDs").GetValue(argument, null);
             List<string> measurementNames = (List<string>)argument.GetType().GetProperty("measurementNames").GetValue(argument, null);
             VariableTime fetchWindow = (VariableTime)argument.GetType().GetProperty("fetchWindow").GetValue(argument, null);
+            if (measurementIDs.Count == 0)
+            {
+                object nullVal = null;
+                e.Result = new { measurementsData = nullVal, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames, isSuccess = false, errorMsg = "Number of measurements are zero..." };
+                return;
+            }
             ConfigurationManager _configManager = new ConfigurationManager();
             _configManager.Initialize();
             HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
             _historyAdapter.Initialize(_configManager);
+            if (dataRate <= 0 || dataRate > 25)
+            {
+                // default dataRate of PMU
+                dataRate = 25;
+            }
             int numWindows = 1;
             // find the number of seconds in a fetch window
             //stub
@@ -233,6 +244,7 @@ namespace PMU_Plotter
             if (reportFetchWindowSecs <= 0)
             {
                 numWindows = 1;
+                reportFetchWindowSecs = Convert.ToInt32(Math.Ceiling((endTime - startTime).TotalSeconds));
             }
             else
             {
@@ -240,27 +252,59 @@ namespace PMU_Plotter
                 int reportfetchSpanSecs = Convert.ToInt32(Math.Ceiling((endTime - startTime).TotalSeconds));
                 numWindows = reportfetchSpanSecs / reportFetchWindowSecs;
             }
+            DateTime fetchEndTime = startTime;
+            Dictionary<object, List<PMUDataStructure>> parsedData;
+            List<PMUMeasDataLists> measurementsData = new List<PMUMeasDataLists>();
 
-            // fetch and update the 1st window
-            DateTime fetchStartTime = startTime;
-            DateTime fetchEndTime = fetchStartTime.AddSeconds(reportFetchWindowSecs);
-            if (fetchEndTime > endTime)
+            for (int window = 0; window < numWindows; window++)
             {
-                fetchEndTime = endTime;
+                // fetch and update for ith window
+                DateTime fetchStartTime = fetchEndTime;
+                fetchEndTime = fetchStartTime.AddSeconds(reportFetchWindowSecs);
+                if (fetchEndTime > endTime)
+                {
+                    fetchEndTime = endTime;
+                }
+                // get the data of all measurementIds for the window
+                parsedData = _historyAdapter.GetData(fetchStartTime, fetchEndTime, measurementIDs, true, false, dataRate);
+                // check if we have atleast one measurement
+                if (measurementIDs.Count > 0 && parsedData != null)
+                {
+                    // get the data of measurements and add to List
+                    for (int i = 0; i < measurementIDs.Count; i++)
+                    {
+                        PMUMeasDataLists measurementData;
+                        measurementData = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                        if (window == 0)
+                        {
+                            measurementsData.Add(measurementData);
+                        }
+                        else
+                        {
+                            measurementsData.ElementAt(i).pmuQualities.AddRange(measurementData.pmuQualities);
+                            measurementsData.ElementAt(i).pmuTimeStamps.AddRange(measurementData.pmuTimeStamps);
+                            measurementsData.ElementAt(i).pmuVals.AddRange(measurementData.pmuVals);
+                        }
+                    }
+                }
+                else
+                {
+                    // we didnot get the required result
+                    e.Result = new { measurementsData = measurementsData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames, isSuccess = false, errorMsg = "Unable to parse data..." };
+                    return;
+                }
+                (sender as BackgroundWorker).ReportProgress(window, new { numWindows = numWindows });
             }
-            if (dataRate <= 0 || dataRate > 25)
-            {
-                // default dataRate of PMU
-                dataRate = 25;
-            }
-            Dictionary<object, List<PMUDataStructure>> parsedData = _historyAdapter.GetData(startTime, endTime, measurementIDs, true, false, dataRate);
-            e.Result = new { parsedData = parsedData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames };
+
+            e.Result = new { measurementsData = measurementsData, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames, isSuccess = true, errorMsg = "" };
         }
 
         // worker thread ui update stuff
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-
+            object res = e.UserState;
+            int numWindows = (int)res.GetType().GetProperty("numWindows").GetValue(res, null);
+            addLinesToConsole("Completed fetching of " + (e.ProgressPercentage + 1).ToString() + " of " + numWindows + " windows");
         }
 
         // worker thread completed stuff
@@ -268,40 +312,39 @@ namespace PMU_Plotter
         {
             addLinesToConsole("Finished fetching data");
             object res = e.Result;
-            Dictionary<object, List<PMUDataStructure>> parsedData = (Dictionary<object, List<PMUDataStructure>>)res.GetType().GetProperty("parsedData").GetValue(res, null);
+
+            bool isSuccess = (bool)res.GetType().GetProperty("isSuccess").GetValue(res, null);
+            string errorMsg = (string)res.GetType().GetProperty("errorMsg").GetValue(res, null);
+
+            if (isSuccess == false)
+            {
+                addLinesToConsole(errorMsg);
+                return;
+            }
+
+            List<PMUMeasDataLists> measurementsData = (List<PMUMeasDataLists>)res.GetType().GetProperty("measurementsData").GetValue(res, null);
             List<int> measurementIDs = (List<int>)res.GetType().GetProperty("measurementIDs").GetValue(res, null);
             List<string> measurementNames = (List<string>)res.GetType().GetProperty("measurementNames").GetValue(res, null);
             int dataRate = (int)res.GetType().GetProperty("dataRate").GetValue(res, null);
+
             // SeriesCollection = new SeriesCollection();
             SeriesCollection.Clear();
-            PMUMeasDataLists lists;
-            // check if we have atleast one measurement
-            if (measurementIDs.Count > 0 && parsedData != null)
-            {
-                // lets keep step as 1 minute. Todo change step as per the plot preferences.
-                Step = dataRate;
-                // get 1st list and add to SeriesCollection
-                lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
-                timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
 
-                // get the data of remaining measurements and add to SeriesCollection
-                for (int i = 1; i < measurementIDs.Count; i++)
-                {
-                    lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
-                    SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
-                }
-                addLinesToConsole("Viola! Finished plotting");
-            }
-            else if (parsedData == null)
-            {
-                addLinesToConsole("Unable to parse the fetched data...");
-            }
-            else if (measurementIDs.Count == 0)
-            {
-                addLinesToConsole("No measurement Ids to plot...");
-            }
+            // Todo change step as per the plot preferences.
+            Step = dataRate;
 
+            // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
+            PMUMeasDataLists lists = measurementsData.ElementAt(0);
+            timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
+            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
+
+            // get the data of remaining measurements and add to SeriesCollection
+            for (int i = 1; i < measurementIDs.Count; i++)
+            {
+                lists = measurementsData.ElementAt(i);
+                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
+            }
+            addLinesToConsole("Viola! Finished plotting");
         }
 
         public void addLinesToConsole(string str)
