@@ -302,7 +302,7 @@ namespace PMU_Plotter
 
         private void GearedTest_Click(object sender, RoutedEventArgs e)
         {
-            GearedTest gearedTestWindow = new GearedTest();
+            GearedPlotWindow gearedTestWindow = new GearedPlotWindow();
             gearedTestWindow.Show();
 
         }

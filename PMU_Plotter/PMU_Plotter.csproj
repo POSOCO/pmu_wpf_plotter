@@ -106,8 +106,8 @@
     </ApplicationDefinition>
     <Compile Include="BinaryData.cs" />
     <Compile Include="ConfigurationManager.cs" />
-    <Compile Include="GearedTest.xaml.cs">
-      <DependentUpon>GearedTest.xaml</DependentUpon>
+    <Compile Include="GearedPlotWindow.xaml.cs">
+      <DependentUpon>GearedPlotWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="HistoryDataAdapter.cs" />
     <Compile Include="PhasorPointBinaryDataParser.cs" />
@@ -127,7 +127,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GearedTest.xaml">
+    <Page Include="GearedPlotWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
