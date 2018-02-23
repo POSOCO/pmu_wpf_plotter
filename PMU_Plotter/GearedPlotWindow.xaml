@@ -14,12 +14,18 @@
             <Setter Property="Margin"
                     Value="10 0 0 0" />
         </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Background"
+                    Value="#171717" />
+            <Setter Property="Foreground"
+                    Value="#969696" />
+        </Style>
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="Open" CanExecute="OpenCommand_CanExecute" Executed="OpenCommand_Executed" />
         <CommandBinding Command="Save" CanExecute="SaveCommand_CanExecute" Executed="SaveCommand_Executed" />
     </Window.CommandBindings>
-    <DockPanel>
+    <DockPanel Background="Black">
         <StackPanel DockPanel.Dock="Top" Orientation="Vertical">
             <Menu IsMainMenu="True">
                 <MenuItem Header="_File">
@@ -72,14 +78,21 @@
                     <Button Name="FetchPointsBtn" Click="FetchBtn_Click" Style="{StaticResource ButtonStyle}" >Fetch Points Data</Button>
                     <Button Name="ConfigPointsBtn" Click="ConfigBtn_Click" Style="{StaticResource ButtonStyle}" >Configure Points</Button>
                 </StackPanel>-->
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="0" Name="MyChart" Zoom="Xy" Pan="Xy" DisableAnimations="True" Hoverable="True">
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="0" Name="MyChart" Zoom="Xy" Pan="Xy" DisableAnimations="True" Hoverable="True" Background="#171717">
+                    <lvc:CartesianChart.ChartLegend>
+                        <lvc:DefaultLegend Foreground="White"/>
+                    </lvc:CartesianChart.ChartLegend>
                     <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="" LabelFormatter="{Binding YFormatter}"></lvc:Axis>
+                        <lvc:Axis Title="" LabelFormatter="{Binding YFormatter}" Foreground="White">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator IsEnabled="True" Stroke="#3c3c3c"></lvc:Separator>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
                     </lvc:CartesianChart.AxisY>
                     <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="" LabelFormatter="{Binding XFormatter}">
+                        <lvc:Axis Title="" LabelFormatter="{Binding XFormatter}" Foreground="White">
                             <lvc:Axis.Separator>
-                                <lvc:Separator IsEnabled="True"></lvc:Separator>
+                                <lvc:Separator IsEnabled="True" Stroke="#3c3c3c"></lvc:Separator>
                             </lvc:Axis.Separator>
                         </lvc:Axis>
                     </lvc:CartesianChart.AxisX>

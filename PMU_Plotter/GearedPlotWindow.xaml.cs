@@ -164,11 +164,8 @@ namespace PMU_Plotter
                 pmuVals.Add(val);
             }
             SeriesCollection.Add(new GLineSeries() { Title = "Geared Values Testing", Values = new GearedValues<double>(pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
-            MyChart.AxisX[0].MinValue = -100;
-            MyChart.AxisX[0].MaxValue = 100100;
-            MyChart.AxisY[0].MinValue = 0;
-            MyChart.AxisY[0].MaxValue = 15;
             addLinesToConsole("Finished Plotting!!!");
+            Reset_Click(null, new RoutedEventArgs());
         }
 
         private void FetchBtn_Click(object sender, RoutedEventArgs e)
@@ -213,7 +210,7 @@ namespace PMU_Plotter
         }
 
         // worker thread background stuff
-        // Todo stub implement piecewise fetching here like that of on demand fetch
+        // Todo update immediately on the chart after the piecewise fetch
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             // todo refer template manager for for doing the piecewise fetch
@@ -347,6 +344,7 @@ namespace PMU_Plotter
                 SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
             }
             addLinesToConsole("Viola! Finished plotting");
+            Reset_Click(null, new RoutedEventArgs());
         }
 
         public void addLinesToConsole(string str)

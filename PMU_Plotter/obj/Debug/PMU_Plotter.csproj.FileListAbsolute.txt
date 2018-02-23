@@ -69,3 +69,4 @@ E:\User\rajkumar\PMU_Plotter\pmu_wpf_plotter\PMU_Plotter\obj\Debug\PMU_Plotter.e
 E:\User\rajkumar\PMU_Plotter\pmu_wpf_plotter\PMU_Plotter\obj\Debug\PMU_Plotter.application
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\GearedPlotWindow.g.cs
 C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\GearedPlotWindow.baml
+C:\Users\Nagasudhir\Documents\C# Projects\PMU_Plotter\PMU_Plotter\obj\Debug\App.baml
