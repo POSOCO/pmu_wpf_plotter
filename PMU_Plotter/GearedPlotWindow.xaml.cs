@@ -25,6 +25,8 @@ namespace PMU_Plotter
     /// </summary>
     public partial class GearedPlotWindow : Window
     {
+        // todo stop fetching button that will stop the worker
+        // save user preferences - https://blogs.msdn.microsoft.com/patrickdanino/2008/07/23/user-settings-in-wpf/
         public SeriesCollection SeriesCollection { get; set; }
         public long Step { get; set; }
         public Func<double, string> YFormatter { get; set; }
@@ -42,10 +44,10 @@ namespace PMU_Plotter
 
             plotTemplate_ = new PlotDataTemplate();
 
-            _configManager = new ConfigurationManager();
-            _configManager.Initialize();
-            _historyAdapter = new HistoryDataAdapter();
-            _historyAdapter.Initialize(_configManager);
+            //_configManager = new ConfigurationManager();
+            //_configManager.Initialize();
+            //_historyAdapter = new HistoryDataAdapter();
+            //_historyAdapter.Initialize(_configManager);
 
             String str = (String)((App)Application.Current).Properties["FilePathArgName"];
             openFileName(str);
