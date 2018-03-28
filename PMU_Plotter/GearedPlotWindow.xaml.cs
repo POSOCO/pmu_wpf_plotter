@@ -36,14 +36,12 @@ namespace PMU_Plotter
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
         PointsConfigWindow configWindow;
-
+        
         public GearedPlotWindow()
         {
             InitializeComponent();
             addLinesToConsole("Welcome User!");
-
             plotTemplate_ = new PlotDataTemplate();
-
             //_configManager = new ConfigurationManager();
             //_configManager.Initialize();
             //_historyAdapter = new HistoryDataAdapter();
@@ -229,6 +227,7 @@ namespace PMU_Plotter
                 e.Result = new { measurementsData = nullVal, startTime = startTime, endTime = endTime, dataRate = dataRate, measurementIDs = measurementIDs, measurementNames = measurementNames, isSuccess = false, errorMsg = "Number of measurements are zero..." };
                 return;
             }
+
             ConfigurationManager _configManager = new ConfigurationManager();
             _configManager.Initialize();
             HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
@@ -285,7 +284,7 @@ namespace PMU_Plotter
                             measurementsData.ElementAt(i).pmuQualities.AddRange(measurementData.pmuQualities);
                             measurementsData.ElementAt(i).pmuTimeStamps.AddRange(measurementData.pmuTimeStamps);
                             measurementsData.ElementAt(i).pmuVals.AddRange(measurementData.pmuVals);
-                        }
+                        }                        
                     }
                 }
                 else
@@ -334,6 +333,11 @@ namespace PMU_Plotter
             // Todo change step as per the plot preferences.
             Step = dataRate;
 
+            double minXVal = 0;
+            double maxXVal = double.NaN;
+            double minYVal = double.NaN;
+            double maxYVal = double.NaN;
+            
             // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
             PMUMeasDataLists lists = measurementsData.ElementAt(0);
             timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
@@ -344,9 +348,35 @@ namespace PMU_Plotter
             {
                 lists = measurementsData.ElementAt(i);
                 SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
+                // update min max Y Vals, max X val
+                double tempVal = lists.pmuVals.Count;
+                if (double.IsNaN(maxXVal) || maxXVal < tempVal)
+                {
+                    maxXVal = tempVal;
+                }
+
+                tempVal = lists.pmuVals.Max();
+                if (double.IsNaN(maxYVal) || maxYVal < tempVal)
+                {
+                    maxYVal = tempVal;
+                }
+
+                tempVal = lists.pmuVals.Min();
+                if (double.IsNaN(minYVal) || minYVal > tempVal)
+                {
+                    minYVal = tempVal;
+                }
             }
+            
+            // Set Axes limits
+            MyChart.AxisX[0].MinValue = minXVal;
+            MyChart.AxisX[0].MaxValue = maxXVal;
+            MyChart.AxisY[0].MinValue = minYVal;
+            MyChart.AxisY[0].MaxValue = maxYVal;
+
             addLinesToConsole("Viola! Finished plotting");
-            Reset_Click(null, new RoutedEventArgs());
+            
+            //Reset_Click(null, new RoutedEventArgs());
         }
 
         public void addLinesToConsole(string str)
