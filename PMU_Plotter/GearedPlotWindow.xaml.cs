@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,7 +37,7 @@ namespace PMU_Plotter
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
         PointsConfigWindow configWindow;
-        
+
         public GearedPlotWindow()
         {
             InitializeComponent();
@@ -76,6 +77,7 @@ namespace PMU_Plotter
                 plotTemplate_ = JsonConvert.DeserializeObject<PlotDataTemplate>(File.ReadAllText(str));
                 // Display the file contents by using a foreach loop.
                 WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
+                FetchAndPlotData();
             }
         }
 
@@ -165,10 +167,15 @@ namespace PMU_Plotter
             }
             SeriesCollection.Add(new GLineSeries() { Title = "Geared Values Testing", Values = new GearedValues<double>(pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
             addLinesToConsole("Finished Plotting!!!");
-            Reset_Click(null, new RoutedEventArgs());
+            ResetAxes();
         }
 
         private void FetchBtn_Click(object sender, RoutedEventArgs e)
+        {
+            FetchAndPlotData();
+        }
+
+        private void FetchAndPlotData()
         {
             // fetch the points data from plotTemplate_ and plot them
             DateTime startTime = DateTime.Now;
@@ -284,7 +291,7 @@ namespace PMU_Plotter
                             measurementsData.ElementAt(i).pmuQualities.AddRange(measurementData.pmuQualities);
                             measurementsData.ElementAt(i).pmuTimeStamps.AddRange(measurementData.pmuTimeStamps);
                             measurementsData.ElementAt(i).pmuVals.AddRange(measurementData.pmuVals);
-                        }                        
+                        }
                     }
                 }
                 else
@@ -333,11 +340,6 @@ namespace PMU_Plotter
             // Todo change step as per the plot preferences.
             Step = dataRate;
 
-            double minXVal = 0;
-            double maxXVal = double.NaN;
-            double minYVal = double.NaN;
-            double maxYVal = double.NaN;
-            
             // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
             PMUMeasDataLists lists = measurementsData.ElementAt(0);
             timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
@@ -347,36 +349,9 @@ namespace PMU_Plotter
             for (int i = 1; i < measurementIDs.Count; i++)
             {
                 lists = measurementsData.ElementAt(i);
-                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
-                // update min max Y Vals, max X val
-                double tempVal = lists.pmuVals.Count;
-                if (double.IsNaN(maxXVal) || maxXVal < tempVal)
-                {
-                    maxXVal = tempVal;
-                }
-
-                tempVal = lists.pmuVals.Max();
-                if (double.IsNaN(maxYVal) || maxYVal < tempVal)
-                {
-                    maxYVal = tempVal;
-                }
-
-                tempVal = lists.pmuVals.Min();
-                if (double.IsNaN(minYVal) || minYVal > tempVal)
-                {
-                    minYVal = tempVal;
-                }
+                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });               
             }
-            
-            // Set Axes limits
-            MyChart.AxisX[0].MinValue = minXVal;
-            MyChart.AxisX[0].MaxValue = maxXVal;
-            MyChart.AxisY[0].MinValue = minYVal;
-            MyChart.AxisY[0].MaxValue = maxYVal;
-
-            addLinesToConsole("Viola! Finished plotting");
-            
-            //Reset_Click(null, new RoutedEventArgs());
+            ResetAxes();
         }
 
         public void addLinesToConsole(string str)
@@ -465,7 +440,7 @@ namespace PMU_Plotter
 
         }
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
+        private void ResetAxes()
         {
             // If no line series are present, then use Double.NaN for resetting the axis
             if (SeriesCollection.Count == 0)
@@ -478,28 +453,60 @@ namespace PMU_Plotter
             else
             {
                 // get the first sample of all the lineseries, add +-10 for Y max/min and , lineSeries length for X axis max/min
-                double maxYVal = 10;
-                double minYVal = 0;
+                double maxYVal = double.NaN;
+                double minYVal = double.NaN;
                 double numXSamples = 100;
                 // find the number of samples present
                 numXSamples = SeriesCollection.ElementAt(0).Values.Count;
                 for (int i = 0; i < SeriesCollection.Count; i++)
                 {
-                    double firstSample = SeriesCollection.ElementAt(i).Values.GetPoints(SeriesCollection.ElementAt(i)).ElementAt(0).Y;
-                    if (minYVal > firstSample)
+                    //double maxSeriesVal = ((LiveCharts.Geared.GearedValues<float>)SeriesCollection.ElementAt(i).Values).Max();
+                    //double minSeriesVal = ((LiveCharts.Geared.GearedValues<float>)SeriesCollection.ElementAt(i).Values).Min();
+                    LiveCharts.Geared.GearedValues<float> SeriesValues = ((LiveCharts.Geared.GearedValues<float>)SeriesCollection.ElementAt(i).Values);
+                    if (SeriesValues.Count < 1)
                     {
-                        minYVal = firstSample;
+                        continue;
                     }
-                    if (maxYVal < firstSample)
+                    double maxSeriesVal = SeriesValues.Max();
+                    if (double.IsNaN(maxSeriesVal))
                     {
-                        maxYVal = firstSample;
+                        maxSeriesVal = SeriesValues.First();
+                    }
+
+                    double minSeriesVal = SeriesValues.Min();
+                    if (double.IsNaN(minSeriesVal))
+                    {
+                        minSeriesVal = SeriesValues.First();
+                    }
+
+                    if (double.IsNaN(minYVal))
+                    {
+                        minYVal = minSeriesVal;
+                    }
+
+                    if (double.IsNaN(maxYVal))
+                    {
+                        maxYVal = maxSeriesVal;
+                    }
+
+                    if (!double.IsNaN(minSeriesVal) && minYVal > minSeriesVal)
+                    {
+                        minYVal = minSeriesVal;
+                    }
+                    if (!double.IsNaN(maxSeriesVal) && maxYVal < maxSeriesVal)
+                    {
+                        maxYVal = maxSeriesVal;
                     }
                 }
-                MyChart.AxisX[0].MinValue = 0;
-                MyChart.AxisX[0].MaxValue = numXSamples;
-                MyChart.AxisY[0].MinValue = minYVal - 10;
-                MyChart.AxisY[0].MaxValue = maxYVal + 10;
+                MyChart.AxisX[0].SetRange(0, numXSamples);
+                MyChart.AxisY[0].SetRange(minYVal, maxYVal);
             }
+            
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+            ResetAxes();
             addLinesToConsole("Reset Axis done...");
         }
 
