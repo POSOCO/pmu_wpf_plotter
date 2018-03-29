@@ -43,7 +43,7 @@ namespace PMU_Plotter
             }
             else
             {
-                Host = "10.165.195.53";
+                Host = "172.16.183.131";
                 Port = 24721;
                 Path = "/eterra-ws/HistoricalTrendProvider";
                 UserName = "pdcAdmin";
