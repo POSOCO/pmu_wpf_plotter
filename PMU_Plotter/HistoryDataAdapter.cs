@@ -148,18 +148,18 @@ namespace PMU_Plotter
                 else if (getFullData)
                 {
                     _serviceClient = CreateServiceClient();
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                     _serviceClient.Open();
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
 
                     byte[] data = _serviceClient.GetFullResolutionData(tre, measurementIDs.ToArray());
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                     _serviceClient.Close();
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                     // TemplateView.addItemsToConsole(templateName + " data fetch completed");
                     PhasorPointBinaryDataParser parser = new PhasorPointBinaryDataParser();
                     parsedData = parser.Parse(data);
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                     // TemplateView.addItemsToConsole(templateName + " data parsing completed");
 
                     return parsedData;
