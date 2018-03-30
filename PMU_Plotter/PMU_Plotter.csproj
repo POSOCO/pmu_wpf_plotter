@@ -15,7 +15,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>\\localhost\\Users\\Nagasudhir\\Documents\\C# Projects\\PMU_Plotter\\publish\\</PublishUrl>
+    <PublishUrl>\\localhost\\E\\User\\rajkumar\\pmu_wpf_plotter\\publish\\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Unc</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -27,8 +27,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ProductName>PMU_WPF_Plotter</ProductName>
     <PublisherName>WRLDC</PublisherName>
-    <ApplicationRevision>4</ApplicationRevision>
-    <ApplicationVersion>2.0.0.4</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>2.0.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>false</BootstrapperEnabled>
