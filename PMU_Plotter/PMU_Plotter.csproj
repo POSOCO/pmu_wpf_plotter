@@ -111,6 +111,7 @@
     <Compile Include="GearedPlotWindow.xaml.cs">
       <DependentUpon>GearedPlotWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="HistoryDataAdapter.cs" />
     <Compile Include="PhasorPointBinaryDataParser.cs" />
     <Compile Include="PhasorPointEndpointBehavior.cs" />

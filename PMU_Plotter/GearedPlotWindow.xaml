@@ -36,14 +36,8 @@
                     <Separator />
                     <MenuItem Header="_Close" Click="Close_Click"/>
                 </MenuItem>
-                <MenuItem Header="_Edit" />
-                <MenuItem Header="_View"/>
                 <MenuItem Header="_Window" >
                     <MenuItem Header="NewWindow" Click="NewWindow_Click"/>
-                    <MenuItem Header="NonGearedWindow" Click="NonGearedWindow_Click"/>
-                </MenuItem>
-                <MenuItem Header="_Help">
-                    <MenuItem Header="_About" Click="About_Click"/>
                 </MenuItem>
                 <MenuItem Header="Zoom">
                     <MenuItem Header="ZoomXY" Tag="ZXY" Click="Zoom_Click" IsCheckable="True" IsChecked="True"/>
@@ -59,8 +53,13 @@
                 </MenuItem>
                 <MenuItem Header="ResetAxis" Click="Reset_Click"></MenuItem>
                 <MenuItem Header="Graph">
-                    <MenuItem Header="Configure Points" Click="ConfigBtn_Click"/>
+                    <MenuItem Header="Configure" Click="ConfigBtn_Click"/>                    
+                </MenuItem>
+                <MenuItem Header="Test">
                     <MenuItem Header="Test 10,000 Points" Click="TestBtn_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Help">
+                    <MenuItem Header="_About" Click="About_Click"/>
                 </MenuItem>
                 <MenuItem Header="FetchData" Click="FetchBtn_Click"></MenuItem>
             </Menu>
@@ -78,9 +77,9 @@
                     <Button Name="FetchPointsBtn" Click="FetchBtn_Click" Style="{StaticResource ButtonStyle}" >Fetch Points Data</Button>
                     <Button Name="ConfigPointsBtn" Click="ConfigBtn_Click" Style="{StaticResource ButtonStyle}" >Configure Points</Button>
                 </StackPanel>-->
-                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="0" Name="MyChart" Zoom="Xy" Pan="Xy" DisableAnimations="True" Hoverable="True" Background="#171717">
+                <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Row="0" Name="MyChart" Zoom="Xy" Pan="Xy" DisableAnimations="True" Hoverable="True" Background="{Binding PlotBackgroundColor}">
                     <lvc:CartesianChart.ChartLegend>
-                        <lvc:DefaultLegend Foreground="White"/>
+                        <lvc:DefaultLegend Foreground="WhiteSmoke"/>
                     </lvc:CartesianChart.ChartLegend>
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis Title="" LabelFormatter="{Binding YFormatter}" Foreground="White">

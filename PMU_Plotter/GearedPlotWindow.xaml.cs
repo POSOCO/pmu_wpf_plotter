@@ -7,31 +7,58 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using PMU_Plotter.Helpers;
+using System.Drawing;
 
 namespace PMU_Plotter
 {
     /// <summary>
     /// Interaction logic for GearedTest.xaml
     /// </summary>
-    public partial class GearedPlotWindow : Window
+    public partial class GearedPlotWindow : Window, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         // todo stop fetching button that will stop the worker
         // save user preferences - https://blogs.msdn.microsoft.com/patrickdanino/2008/07/23/user-settings-in-wpf/
         public SeriesCollection SeriesCollection { get; set; }
         public long Step { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> XFormatter { get; set; }
+
+        public string PlotBackgroundColor
+        {
+            get
+            {
+                return plotTemplate_.BackgroundColor;
+            }
+            set
+            {
+                plotTemplate_.BackgroundColor = value;
+            }
+        }
+
+        // not used
+        public string LegendTextColor
+        {
+            get
+            {
+                //Color c = Helpers.Helpers.IdealTextColor((Color)ColorConverter.ConvertFromString("#000000"));
+                //string hexString = Helpers.Helpers.ColorToHexString(c);
+                //return hexString;
+                return plotTemplate_.TextColor;
+            }
+        }
+
         public List<DateTime> timeStamps_ { get; set; }
         PlotDataTemplate plotTemplate_;
         ConfigurationManager _configManager;
@@ -78,6 +105,7 @@ namespace PMU_Plotter
                 // Display the file contents by using a foreach loop.
                 WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
                 FetchAndPlotData();
+                ResetAxes();
             }
         }
 
@@ -157,15 +185,15 @@ namespace PMU_Plotter
         {
             addLinesToConsole("Started Plotting...");
             SeriesCollection.Clear();
-            List<double> pmuVals = new List<double>();
+            List<float> pmuVals = new List<float>();
             Random randNumGenerator = new Random();
-            double val = 0;
+            float val = 0;
             for (int i = 0; i < 100000; i++)
             {
-                val = val + 0.001 * randNumGenerator.Next(-100, 100);
+                val = val + 0.001f * randNumGenerator.Next(-100, 100);
                 pmuVals.Add(val);
             }
-            SeriesCollection.Add(new GLineSeries() { Title = "Geared Values Testing", Values = new GearedValues<double>(pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
+            SeriesCollection.Add(new GLineSeries() { Title = "Geared Values Testing", Values = new GearedValues<float>(pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
             addLinesToConsole("Finished Plotting!!!");
             ResetAxes();
         }
@@ -343,15 +371,15 @@ namespace PMU_Plotter
             // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
             PMUMeasDataLists lists = measurementsData.ElementAt(0);
             timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
+            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
 
             // get the data of remaining measurements and add to SeriesCollection
             for (int i = 1; i < measurementIDs.Count; i++)
             {
                 lists = measurementsData.ElementAt(i);
-                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });               
+                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
             }
-            ResetAxes();
+            //ResetAxes();
         }
 
         public void addLinesToConsole(string str)
@@ -498,22 +526,21 @@ namespace PMU_Plotter
                         maxYVal = maxSeriesVal;
                     }
                 }
-                MyChart.AxisX[0].SetRange(0, numXSamples);
-                MyChart.AxisY[0].SetRange(minYVal, maxYVal);
+                double valDiff = 0;
+                if (!double.IsNaN(maxYVal) && !double.IsNaN(minYVal))
+                {
+                    valDiff = maxYVal - minYVal;
+                }
+                MyChart.AxisX[0].SetRange(-numXSamples * 0.1, numXSamples * 1.1);
+                MyChart.AxisY[0].SetRange(minYVal - valDiff * 0.1, maxYVal + valDiff * 0.1);
             }
-            
+
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             ResetAxes();
             addLinesToConsole("Reset Axis done...");
-        }
-
-        private void NonGearedWindow_Click(object sender, RoutedEventArgs e)
-        {
-            MainWindow mainWindow = new MainWindow();
-            mainWindow.Show();
         }
 
         private void NewWindow_Click(object sender, RoutedEventArgs e)
@@ -546,6 +573,8 @@ namespace PMU_Plotter
             {
                 // change the plot Data Template as per the window message
                 this.plotTemplate_ = e.dataTemplate;
+                //todo use notifypropertychanged with a vm to notify the background and text colors
+                NotifyPropertyChanged("PlotBackgroundColor");
             }
         }
     }

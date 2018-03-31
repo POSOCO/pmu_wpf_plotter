@@ -3,23 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace PMU_Plotter
 {
     public class PlotDataTemplate
     {
-        public List<int> measIds { get; set; }
+        public List<int> measIds { get; set; } = new List<int>();
         public List<String> measurementNames { get; set; }
-        public string dataSetName { get; set; }
-        public string startDateMode { get; set; }
-        public DateTime startDateTime { get; set; }
-        public VariableTime startDateVariable { get; set; }
-        public string endDateMode { get; set; }
-        public DateTime endDateTime { get; set; }
-        public VariableTime endDateVariable { get; set; }
-        public int dataRate { get; set; }
-        public VariableTime fetchWindow { get; set; }
-
+        public string dataSetName { get; set; } = "Plot Title";
+        public string startDateMode { get; set; } = "variable";
+        public DateTime startDateTime { get; set; } = DateTime.Now;
+        public VariableTime startDateVariable { get; set; } = new VariableTime();
+        public string endDateMode { get; set; } = "variable";
+        public DateTime endDateTime { get; set; } = DateTime.Now;
+        public VariableTime endDateVariable { get; set; } = new VariableTime();
+        public int dataRate { get; set; } = 25;
+        public VariableTime fetchWindow { get; set; } = new VariableTime();
+        public string BackgroundColor { get; set; } = "#171717";
+        //public string TextColor { get; set; } = Helpers.Helpers.ColorToHexString(Helpers.Helpers.IdealTextColor((Color)ColorConverter.ConvertFromString("#171717")));
+        public string TextColor { get; set; } = "#FF0000";
         public PlotDataTemplate()
         {
             measIds = new List<int>();
