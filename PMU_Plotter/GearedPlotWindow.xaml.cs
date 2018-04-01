@@ -11,8 +11,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using PMU_Plotter.Helpers;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,6 +33,7 @@ namespace PMU_Plotter
 
         // ***Declare a System.Threading.CancellationTokenSource.
         CancellationTokenSource cts;
+
         public SeriesCollection SeriesCollection { get; set; }
         public long Step { get; set; }
         public Func<double, string> YFormatter { get; set; }
@@ -81,7 +80,7 @@ namespace PMU_Plotter
             _historyAdapter.Initialize(_configManager);
 
             String str = (String)((App)Application.Current).Properties["FilePathArgName"];
-            openFileName(str);
+            OpenFileName(str);
             SeriesCollection = new SeriesCollection();
             timeStamps_ = new List<DateTime> { DateTime.Now };
             //Labels = new string[0];
@@ -102,15 +101,15 @@ namespace PMU_Plotter
             DataContext = this;
         }
 
-        private void openFileName(string str)
+        private async void OpenFileName(string str)
         {
             if (str != null)
             {
                 plotTemplate_ = JsonConvert.DeserializeObject<PlotDataTemplate>(File.ReadAllText(str));
                 // Display the file contents by using a foreach loop.
                 WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
-                FetchAndPlotData();
-                //ResetAxes();
+                await FetchAndPlotData();
+                ResetAxes();
             }
         }
 
@@ -129,7 +128,7 @@ namespace PMU_Plotter
             if (openFileDialog.ShowDialog() == true)
             {
                 string filename = openFileDialog.FileNames[0];
-                openFileName(filename);
+                OpenFileName(filename);
                 if (filename != null)
                 {
                     ((App)Application.Current).Properties["FilePathArgName"] = filename;
@@ -203,24 +202,55 @@ namespace PMU_Plotter
             ResetAxes();
         }
 
-        private void FetchBtn_Click(object sender, RoutedEventArgs e)
+        private async void FetchBtn_Click(object sender, RoutedEventArgs e)
         {
-            FetchAndPlotData();
-            //ResetAxes();
+            await FetchAndPlotData();
+            ResetAxes();
+        }
+
+        private void FetchStopBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // stop running fetch tasks
+            if (cts != null)
+            {
+                cts.Cancel();                
+            }
         }
 
         private async Task FetchAndPlotData()
         {
-            // fetch the points data from plotTemplate_ and plot them
-            DateTime startTime = Helpers.Helpers.GetTimeFromTemplate(plotTemplate_.startDateMode, plotTemplate_.startDateVariable, plotTemplate_.startDateTime);
-            DateTime endTime = Helpers.Helpers.GetTimeFromTemplate(plotTemplate_.endDateMode, plotTemplate_.endDateVariable, plotTemplate_.endDateTime);
-            if (plotTemplate_.measIds.Count == 0)
+            // stop running fetch tasks
+            if (cts != null)
             {
-                plotTemplate_.measIds.AddRange(new List<int>() { 4924, 4929 });
-                plotTemplate_.measurementNames.AddRange(new List<string>() { "meas1", "meas2" });
+                //cts.Cancel();
+                return;
             }
-            //PlotMeasIds(startTime, endTime);
-            await PlotMeasIdsAsync(startTime, endTime);
+            // ***Instantiate the CancellationTokenSource.
+            cts = new CancellationTokenSource();
+            try
+            {
+                // fetch the points data from plotTemplate_ and plot them
+                DateTime startTime = Helpers.Helpers.GetTimeFromTemplate(plotTemplate_.startDateMode, plotTemplate_.startDateVariable, plotTemplate_.startDateTime);
+                DateTime endTime = Helpers.Helpers.GetTimeFromTemplate(plotTemplate_.endDateMode, plotTemplate_.endDateVariable, plotTemplate_.endDateTime);
+                if (plotTemplate_.measIds.Count == 0)
+                {
+                    plotTemplate_.measIds.AddRange(new List<int>() { 4924, 4929 });
+                    plotTemplate_.measurementNames.AddRange(new List<string>() { "meas1", "meas2" });
+                }
+                //PlotMeasIds(startTime, endTime);
+                await PlotMeasIdsAsync(startTime, endTime, cts.Token);
+            }
+            // *** If cancellation is requested, an OperationCanceledException results.
+            catch (OperationCanceledException)
+            {
+                AddLinesToConsole("Existing Fetch task cancelled");
+            }
+            catch (Exception ex)
+            {
+                AddLinesToConsole($"Error in running fetch task: {ex.Message}");
+            }
+            // ***Set the CancellationTokenSource to null when the download is complete.
+            cts = null;
         }
 
         public void PlotMeasIds(DateTime startTime, DateTime endTime)
@@ -373,14 +403,10 @@ namespace PMU_Plotter
             ResetAxes();
         }
 
-        public async Task PlotMeasIdsAsync(DateTime startTime, DateTime endTime)
+        public async Task PlotMeasIdsAsync(DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
         {
-            // stop running fetch tasks
-            if (cts != null)
-            {
-                cts.Cancel();
-            }
-            AddLinesToConsole("Started fetching data");
+            await Task.Delay(1); // 0 millisecond delay
+            AddLinesToConsole("Started fetching async data");
             int dataRate = plotTemplate_.dataRate;
             List<int> measurementIDs = plotTemplate_.measIds;
             List<string> measurementNames = plotTemplate_.measurementNames;
@@ -428,6 +454,7 @@ namespace PMU_Plotter
                 }
                 // get the data of all measurementIds for the window
                 parsedData = await _historyAdapter.GetDataAsync(fetchStartTime, fetchEndTime, measurementIDs, true, false, dataRate);
+                cancellationToken.ThrowIfCancellationRequested();
                 // check if we have atleast one measurement
                 if (parsedData != null)
                 {
@@ -435,7 +462,8 @@ namespace PMU_Plotter
                     for (int i = 0; i < measurementIDs.Count; i++)
                     {
                         PMUMeasDataLists measurementData;
-                        measurementData = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                        measurementData = await _historyAdapter.getDataOfMeasIdAsync(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                        cancellationToken.ThrowIfCancellationRequested();
                         if (window == 0)
                         {
                             measurementsData.Add(measurementData);
@@ -454,10 +482,10 @@ namespace PMU_Plotter
                     return;
                 }
                 // todo update plot
-                AddLinesToConsole($"Completed fetching of {window + 1} of {numWindows} windows");
+                AddLinesToConsole($"Completed async fetching of {window + 1} of {numWindows} windows");
             }
             // fetch completed, now update plot
-            AddLinesToConsole("Finished fetching data");
+            AddLinesToConsole("Finished async fetching data");
             SeriesCollection.Clear();
 
             // Todo change step as per the plot preferences.
@@ -474,8 +502,6 @@ namespace PMU_Plotter
                 lists = measurementsData.ElementAt(i);
                 SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
             }
-            // ***Set the CancellationTokenSource to null when the download is complete.
-            cts = null;
         }
 
         public void AddLinesToConsole(string str)

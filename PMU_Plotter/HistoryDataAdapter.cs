@@ -175,8 +175,10 @@ namespace PMU_Plotter
             return null;
         }
 
+
         public async Task<Dictionary<object, List<PMUDataStructure>>> GetDataAsync(DateTime startTime, DateTime endTime, List<int> measurementIDs, bool getFullData, bool getMinMax, int dataRate)
         {
+            await Task.Delay(1);
             return GetData(startTime, endTime, measurementIDs, getFullData, getMinMax, dataRate);
         }
 
@@ -219,6 +221,12 @@ namespace PMU_Plotter
             }
             PMUMeasDataLists lists = new PMUMeasDataLists(pmuVals, pmuQualities, pmuTimeStamps);
             return lists;
+        }
+
+        public async Task<PMUMeasDataLists> getDataOfMeasIdAsync(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence)
+        {
+            await Task.Delay(1);
+            return getDataOfMeasId(parsedData, measId, checkMeasExistence);
         }
     }
 }
