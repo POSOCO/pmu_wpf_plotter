@@ -105,7 +105,7 @@ namespace PMU_Plotter
                 // Display the file contents by using a foreach loop.
                 WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
                 FetchAndPlotData();
-                ResetAxes();
+                //ResetAxes();
             }
         }
 
@@ -201,6 +201,7 @@ namespace PMU_Plotter
         private void FetchBtn_Click(object sender, RoutedEventArgs e)
         {
             FetchAndPlotData();
+            //ResetAxes();
         }
 
         private void FetchAndPlotData()
@@ -379,7 +380,7 @@ namespace PMU_Plotter
                 lists = measurementsData.ElementAt(i);
                 SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
             }
-            //ResetAxes();
+            ResetAxes();
         }
 
         public void addLinesToConsole(string str)
@@ -471,7 +472,7 @@ namespace PMU_Plotter
         private void ResetAxes()
         {
             // If no line series are present, then use Double.NaN for resetting the axis
-            if (SeriesCollection.Count == 0)
+            if (SeriesCollection == null || SeriesCollection.Count == 0)
             {
                 MyChart.AxisX[0].MinValue = double.NaN;
                 MyChart.AxisX[0].MaxValue = double.NaN;
