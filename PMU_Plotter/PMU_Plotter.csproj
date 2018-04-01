@@ -117,6 +117,7 @@
     <Compile Include="PhasorPointEndpointBehavior.cs" />
     <Compile Include="PhasorPointMessageInspector.cs" />
     <Compile Include="PlotDataTemplate.cs" />
+    <Compile Include="PMUAsyncFetcher.cs" />
     <Compile Include="PMUMeasDataLists.cs" />
     <Compile Include="PointsConfigWindow.xaml.cs">
       <DependentUpon>PointsConfigWindow.xaml</DependentUpon>

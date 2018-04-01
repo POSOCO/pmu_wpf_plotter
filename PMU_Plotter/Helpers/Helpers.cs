@@ -24,5 +24,18 @@ namespace PMU_Plotter.Helpers
             string str = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
             return str;
         }
+
+        public static DateTime GetTimeFromTemplate(string mode, VariableTime variableTime, DateTime dateTime)
+        {
+            DateTime resultTime = DateTime.Now;
+            if (mode == "variable")
+            {
+                resultTime = resultTime.AddHours(variableTime.hours * -1);
+                resultTime = resultTime.AddMinutes(variableTime.mins * -1);
+                resultTime = resultTime.AddSeconds(variableTime.secs * -1);
+            }
+            else { resultTime = dateTime; }
+            return resultTime;
+        }
     }
 }

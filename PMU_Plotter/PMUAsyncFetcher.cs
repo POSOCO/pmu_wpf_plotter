@@ -1,8 +1,6 @@
 ﻿using PMU_Plotter.HistoryProvider;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -10,13 +8,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace PMU_Plotter
 {
-    public class HistoryDataAdapter
+    class PMUAsyncFetcher
     {
         // HistoricalTrendProviderClient _serviceClient;
         Uri _serviceUri;
@@ -175,13 +171,8 @@ namespace PMU_Plotter
             return null;
         }
 
-        public async Task<Dictionary<object, List<PMUDataStructure>>> GetDataAsync(DateTime startTime, DateTime endTime, List<int> measurementIDs, bool getFullData, bool getMinMax, int dataRate)
-        {
-            return GetData(startTime, endTime, measurementIDs, getFullData, getMinMax, dataRate);
-        }
-
         // created by sudhir on 07.11.2017
-        private List<uint> getMeasIDs(Dictionary<object, List<PMUDataStructure>> parsedData)
+        private List<uint> GetMeasIDs(Dictionary<object, List<PMUDataStructure>> parsedData)
         {
             List<uint> measIDs = new List<uint>();
             foreach (var measData in parsedData)
@@ -194,12 +185,12 @@ namespace PMU_Plotter
         }
 
         // created by sudhir 30.12.2017
-        public PMUMeasDataLists getDataOfMeasId(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence = false)
+        public PMUMeasDataLists GetDataOfMeasId(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence = false)
         {
             if (checkMeasExistence)
             {
                 // check if the measId is the measurements list of parsed Data
-                List<uint> measIds = getMeasIDs(parsedData);
+                List<uint> measIds = GetMeasIDs(parsedData);
                 int measIndex = measIds.IndexOf(measId);
                 if (measIndex == -1)
                 {

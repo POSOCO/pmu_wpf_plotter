@@ -13,6 +13,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using PMU_Plotter.Helpers;
 using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PMU_Plotter
 {
@@ -30,6 +32,9 @@ namespace PMU_Plotter
 
         // todo stop fetching button that will stop the worker
         // save user preferences - https://blogs.msdn.microsoft.com/patrickdanino/2008/07/23/user-settings-in-wpf/
+
+        // ***Declare a System.Threading.CancellationTokenSource.
+        CancellationTokenSource cts;
         public SeriesCollection SeriesCollection { get; set; }
         public long Step { get; set; }
         public Func<double, string> YFormatter { get; set; }
@@ -68,12 +73,12 @@ namespace PMU_Plotter
         public GearedPlotWindow()
         {
             InitializeComponent();
-            addLinesToConsole("Welcome User!");
+            AddLinesToConsole("Welcome User!");
             plotTemplate_ = new PlotDataTemplate();
-            //_configManager = new ConfigurationManager();
-            //_configManager.Initialize();
-            //_historyAdapter = new HistoryDataAdapter();
-            //_historyAdapter.Initialize(_configManager);
+            _configManager = new ConfigurationManager();
+            _configManager.Initialize();
+            _historyAdapter = new HistoryDataAdapter();
+            _historyAdapter.Initialize(_configManager);
 
             String str = (String)((App)Application.Current).Properties["FilePathArgName"];
             openFileName(str);
@@ -147,7 +152,7 @@ namespace PMU_Plotter
                 {
                     string jsonText = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
                     File.WriteAllText(filename, jsonText);
-                    addLinesToConsole("Saved the updated template file!!!");
+                    AddLinesToConsole("Saved the updated template file!!!");
                 }
                 else
                 {
@@ -173,7 +178,7 @@ namespace PMU_Plotter
             if (savefileDialog.ShowDialog() == true)
             {
                 File.WriteAllText(savefileDialog.FileName, jsonText);
-                addLinesToConsole("Saved the updated template file!!!");
+                AddLinesToConsole("Saved the updated template file!!!");
                 if (savefileDialog.FileName != null)
                 {
                     ((App)Application.Current).Properties["FilePathArgName"] = savefileDialog.FileName;
@@ -183,7 +188,7 @@ namespace PMU_Plotter
 
         private void TestBtn_Click(object sender, RoutedEventArgs e)
         {
-            addLinesToConsole("Started Plotting...");
+            AddLinesToConsole("Started Plotting...");
             SeriesCollection.Clear();
             List<float> pmuVals = new List<float>();
             Random randNumGenerator = new Random();
@@ -194,7 +199,7 @@ namespace PMU_Plotter
                 pmuVals.Add(val);
             }
             SeriesCollection.Add(new GLineSeries() { Title = "Geared Values Testing", Values = new GearedValues<float>(pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
-            addLinesToConsole("Finished Plotting!!!");
+            AddLinesToConsole("Finished Plotting!!!");
             ResetAxes();
         }
 
@@ -204,50 +209,35 @@ namespace PMU_Plotter
             //ResetAxes();
         }
 
-        private void FetchAndPlotData()
+        private async Task FetchAndPlotData()
         {
             // fetch the points data from plotTemplate_ and plot them
-            DateTime startTime = DateTime.Now;
-            DateTime endTime = DateTime.Now;
-            if (plotTemplate_.startDateMode == "variable")
-            {
-                startTime = startTime.AddHours(plotTemplate_.startDateVariable.hours * -1);
-                startTime = startTime.AddMinutes(plotTemplate_.startDateVariable.mins * -1);
-                startTime = startTime.AddSeconds(plotTemplate_.startDateVariable.secs * -1);
-            }
-            else { startTime = plotTemplate_.startDateTime; }
-
-            if (plotTemplate_.endDateMode == "variable")
-            {
-                endTime = endTime.AddHours(plotTemplate_.endDateVariable.hours * -1);
-                endTime = endTime.AddMinutes(plotTemplate_.endDateVariable.mins * -1);
-                endTime = endTime.AddSeconds(plotTemplate_.endDateVariable.secs * -1);
-            }
-            else { endTime = plotTemplate_.endDateTime; }
-
+            DateTime startTime = Helpers.Helpers.GetTimeFromTemplate(plotTemplate_.startDateMode, plotTemplate_.startDateVariable, plotTemplate_.startDateTime);
+            DateTime endTime = Helpers.Helpers.GetTimeFromTemplate(plotTemplate_.endDateMode, plotTemplate_.endDateVariable, plotTemplate_.endDateTime);
             if (plotTemplate_.measIds.Count == 0)
             {
                 plotTemplate_.measIds.AddRange(new List<int>() { 4924, 4929 });
                 plotTemplate_.measurementNames.AddRange(new List<string>() { "meas1", "meas2" });
             }
-            plotMeasIds(startTime, endTime);
+            //PlotMeasIds(startTime, endTime);
+            await PlotMeasIdsAsync(startTime, endTime);
         }
 
-        public void plotMeasIds(DateTime startTime, DateTime endTime)
+        public void PlotMeasIds(DateTime startTime, DateTime endTime)
         {
             object payLoad = new { startTime = startTime, endTime = endTime, dataRate = plotTemplate_.dataRate, measurementIDs = plotTemplate_.measIds, measurementNames = plotTemplate_.measurementNames, fetchWindow = plotTemplate_.fetchWindow };
-            addLinesToConsole("Started fetching data");
+            AddLinesToConsole("Started fetching data");
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = true;
-            worker.DoWork += worker_DoWork;
-            worker.ProgressChanged += worker_ProgressChanged;
-            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            worker.DoWork += Worker_DoWork;
+            worker.ProgressChanged += Worker_ProgressChanged;
+            worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
             worker.RunWorkerAsync(payLoad);
         }
 
         // worker thread background stuff
         // Todo update immediately on the chart after the piecewise fetch
-        void worker_DoWork(object sender, DoWorkEventArgs e)
+        void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             // todo refer template manager for for doing the piecewise fetch
             object argument = e.Argument;
@@ -336,17 +326,17 @@ namespace PMU_Plotter
         }
 
         // worker thread ui update stuff
-        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             object res = e.UserState;
             int numWindows = (int)res.GetType().GetProperty("numWindows").GetValue(res, null);
-            addLinesToConsole("Completed fetching of " + (e.ProgressPercentage + 1).ToString() + " of " + numWindows + " windows");
+            AddLinesToConsole("Completed fetching of " + (e.ProgressPercentage + 1).ToString() + " of " + numWindows + " windows");
         }
 
         // worker thread completed stuff
-        void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            addLinesToConsole("Finished fetching data");
+            AddLinesToConsole("Finished fetching data");
             object res = e.Result;
 
             bool isSuccess = (bool)res.GetType().GetProperty("isSuccess").GetValue(res, null);
@@ -354,7 +344,7 @@ namespace PMU_Plotter
 
             if (isSuccess == false)
             {
-                addLinesToConsole(errorMsg);
+                AddLinesToConsole(errorMsg);
                 return;
             }
 
@@ -383,7 +373,112 @@ namespace PMU_Plotter
             ResetAxes();
         }
 
-        public void addLinesToConsole(string str)
+        public async Task PlotMeasIdsAsync(DateTime startTime, DateTime endTime)
+        {
+            // stop running fetch tasks
+            if (cts != null)
+            {
+                cts.Cancel();
+            }
+            AddLinesToConsole("Started fetching data");
+            int dataRate = plotTemplate_.dataRate;
+            List<int> measurementIDs = plotTemplate_.measIds;
+            List<string> measurementNames = plotTemplate_.measurementNames;
+            VariableTime fetchWindow = plotTemplate_.fetchWindow;
+            if (measurementIDs.Count == 0)
+            {
+                return;
+            }
+            //ConfigurationManager _configManager = new ConfigurationManager();
+            //_configManager.Initialize();
+            //HistoryDataAdapter _historyAdapter = new HistoryDataAdapter();
+            //_historyAdapter.Initialize(_configManager);
+            if (dataRate <= 0 || dataRate > 25)
+            {
+                // default dataRate of PMU
+                dataRate = 25;
+            }
+            int numWindows = 1;
+            // find the number of seconds in a fetch window
+            //stub
+            int reportFetchWindowSecs = (int)(fetchWindow.hours * 60 * 60 + fetchWindow.mins * 60 + fetchWindow.secs);
+            if (reportFetchWindowSecs <= 0)
+            {
+                numWindows = 1;
+                reportFetchWindowSecs = Convert.ToInt32(Math.Ceiling((endTime - startTime).TotalSeconds));
+            }
+            else
+            {
+                // find the number of fetch windows as Ceil(Fetchspan/windowspan)
+                int reportfetchSpanSecs = Convert.ToInt32(Math.Ceiling((endTime - startTime).TotalSeconds));
+                numWindows = reportfetchSpanSecs / reportFetchWindowSecs;
+            }
+            DateTime fetchEndTime = startTime;
+            Dictionary<object, List<PMUDataStructure>> parsedData;
+            List<PMUMeasDataLists> measurementsData = new List<PMUMeasDataLists>();
+
+            for (int window = 0; window < numWindows; window++)
+            {
+                // fetch and update for ith window
+                DateTime fetchStartTime = fetchEndTime;
+                fetchEndTime = fetchStartTime.AddSeconds(reportFetchWindowSecs);
+                if (fetchEndTime > endTime)
+                {
+                    fetchEndTime = endTime;
+                }
+                // get the data of all measurementIds for the window
+                parsedData = await _historyAdapter.GetDataAsync(fetchStartTime, fetchEndTime, measurementIDs, true, false, dataRate);
+                // check if we have atleast one measurement
+                if (parsedData != null)
+                {
+                    // get the data of measurements and add to List
+                    for (int i = 0; i < measurementIDs.Count; i++)
+                    {
+                        PMUMeasDataLists measurementData;
+                        measurementData = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                        if (window == 0)
+                        {
+                            measurementsData.Add(measurementData);
+                        }
+                        else
+                        {
+                            measurementsData.ElementAt(i).pmuQualities.AddRange(measurementData.pmuQualities);
+                            measurementsData.ElementAt(i).pmuTimeStamps.AddRange(measurementData.pmuTimeStamps);
+                            measurementsData.ElementAt(i).pmuVals.AddRange(measurementData.pmuVals);
+                        }
+                    }
+                }
+                else
+                {
+                    // we didnot get the required result
+                    return;
+                }
+                // todo update plot
+                AddLinesToConsole($"Completed fetching of {window + 1} of {numWindows} windows");
+            }
+            // fetch completed, now update plot
+            AddLinesToConsole("Finished fetching data");
+            SeriesCollection.Clear();
+
+            // Todo change step as per the plot preferences.
+            Step = dataRate;
+
+            // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
+            PMUMeasDataLists lists = measurementsData.ElementAt(0);
+            timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
+            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
+
+            // get the data of remaining measurements and add to SeriesCollection
+            for (int i = 1; i < measurementIDs.Count; i++)
+            {
+                lists = measurementsData.ElementAt(i);
+                SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
+            }
+            // ***Set the CancellationTokenSource to null when the download is complete.
+            cts = null;
+        }
+
+        public void AddLinesToConsole(string str)
         {
             string consoleTxt = WelcomeText.Text;
             // todo limit number of lines to 10
@@ -416,22 +511,22 @@ namespace PMU_Plotter
             if (mItem.Tag.ToString() == "ZXY")
             {
                 MyChart.Zoom = ZoomingOptions.Xy;
-                addLinesToConsole("Zoom mode set to XY");
+                AddLinesToConsole("Zoom mode set to XY");
             }
             else if (mItem.Tag.ToString() == "ZX")
             {
                 MyChart.Zoom = ZoomingOptions.X;
-                addLinesToConsole("Zoom mode set to X");
+                AddLinesToConsole("Zoom mode set to X");
             }
             else if (mItem.Tag.ToString() == "ZY")
             {
                 MyChart.Zoom = ZoomingOptions.Y;
-                addLinesToConsole("Zoom mode set to Y");
+                AddLinesToConsole("Zoom mode set to Y");
             }
             else if (mItem.Tag.ToString() == "ZOff")
             {
                 MyChart.Zoom = ZoomingOptions.None;
-                addLinesToConsole("Zoom mode set to Off");
+                AddLinesToConsole("Zoom mode set to Off");
             }
         }
 
@@ -449,22 +544,22 @@ namespace PMU_Plotter
             if (mItem.Tag.ToString() == "PXY")
             {
                 MyChart.Pan = PanningOptions.Xy;
-                addLinesToConsole("Pan mode set to XY");
+                AddLinesToConsole("Pan mode set to XY");
             }
             else if (mItem.Tag.ToString() == "PX")
             {
                 MyChart.Pan = PanningOptions.X;
-                addLinesToConsole("Pan mode set to X");
+                AddLinesToConsole("Pan mode set to X");
             }
             else if (mItem.Tag.ToString() == "PY")
             {
                 MyChart.Pan = PanningOptions.Y;
-                addLinesToConsole("Pan mode set to Y");
+                AddLinesToConsole("Pan mode set to Y");
             }
             else if (mItem.Tag.ToString() == "POff")
             {
                 MyChart.Pan = PanningOptions.None;
-                addLinesToConsole("Pan mode set to None");
+                AddLinesToConsole("Pan mode set to None");
             }
 
         }
@@ -541,7 +636,7 @@ namespace PMU_Plotter
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             ResetAxes();
-            addLinesToConsole("Reset Axis done...");
+            AddLinesToConsole("Reset Axis done...");
         }
 
         private void NewWindow_Click(object sender, RoutedEventArgs e)
@@ -569,8 +664,7 @@ namespace PMU_Plotter
         }
         void MessageReceived(object sender, ConfigMessageEventArgs e)
         {
-            PointsConfigWindow configWin = sender as PointsConfigWindow;
-            if (configWin != null)
+            if (sender is PointsConfigWindow configWin)
             {
                 // change the plot Data Template as per the window message
                 this.plotTemplate_ = e.dataTemplate;
