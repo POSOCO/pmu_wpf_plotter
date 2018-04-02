@@ -105,9 +105,10 @@ namespace PMU_Plotter
         {
             if (str != null)
             {
+                AddLinesToConsole(str);
                 plotTemplate_ = JsonConvert.DeserializeObject<PlotDataTemplate>(File.ReadAllText(str));
                 // Display the file contents by using a foreach loop.
-                WelcomeText.Text = JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented);
+                AddLinesToConsole(JsonConvert.SerializeObject(plotTemplate_, Formatting.Indented));
                 await FetchAndPlotData();
                 ResetAxes();
             }
@@ -213,7 +214,7 @@ namespace PMU_Plotter
             // stop running fetch tasks
             if (cts != null)
             {
-                cts.Cancel();                
+                cts.Cancel();
             }
         }
 

@@ -284,7 +284,14 @@
   <ItemGroup>
     <WCFMetadataStorage Include="Service References\HistoryProvider\" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <FileAssociation Include=".ezt">
+      <Visible>False</Visible>
+      <Description>PMU Plotter Template</Description>
+      <Progid>1000</Progid>
+      <DefaultIcon>logo.ico</DefaultIcon>
+    </FileAssociation>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
