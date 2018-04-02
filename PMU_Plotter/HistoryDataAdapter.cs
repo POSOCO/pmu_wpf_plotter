@@ -178,12 +178,66 @@ namespace PMU_Plotter
 
         public async Task<Dictionary<object, List<PMUDataStructure>>> GetDataAsync(DateTime startTime, DateTime endTime, List<int> measurementIDs, bool getFullData, bool getMinMax, int dataRate)
         {
-            await Task.Delay(1);
-            return GetData(startTime, endTime, measurementIDs, getFullData, getMinMax, dataRate);
+            Dictionary<object, List<PMUDataStructure>> parsedData = null;
+            try
+            {
+                DateTime utcStartTime = TimeZoneInfo.ConvertTime(startTime, TimeZoneInfo.Local, TimeZoneInfo.Utc);
+                DateTime utcEndTime = TimeZoneInfo.ConvertTime(endTime, TimeZoneInfo.Local, TimeZoneInfo.Utc);
+
+                utcStartTime = DateTime.SpecifyKind((utcStartTime), DateTimeKind.Utc);
+                utcEndTime = DateTime.SpecifyKind((utcEndTime), DateTimeKind.Utc);
+
+                TimeRangeElement tre = new TimeRangeElement();
+                tre.startTime = utcStartTime;
+                tre.endTime = utcEndTime;
+                if (getMinMax)
+                {
+                    _serviceClient = CreateServiceClient();
+                    _serviceClient.Open();
+
+                    byte[] data = _serviceClient.GetPmuMinMaxData(tre, dataRate, measurementIDs.ToArray());
+
+
+                    _serviceClient.Close();
+
+                    PhasorPointBinaryDataParser parser = new PhasorPointBinaryDataParser();
+                    parsedData = parser.Parse(data);
+
+                    return parsedData;
+                }
+                else if (getFullData)
+                {
+                    _serviceClient = CreateServiceClient();
+                    _serviceClient.Open();
+
+                    //byte[] data = _serviceClient.GetFullResolutionData(tre, measurementIDs.ToArray());
+                    byte[] data = await Task.Run<byte[]>(() =>
+                    {
+                        return _serviceClient.GetFullResolutionData(tre, measurementIDs.ToArray());
+                    });
+                    _serviceClient.Close();
+                    PhasorPointBinaryDataParser parser = new PhasorPointBinaryDataParser();
+                    //parsedData = parser.Parse(data);
+                    parsedData = await Task.Run<Dictionary<object, List<PMUDataStructure>>>(() =>
+                    {
+                        return parser.Parse(data);
+                    });
+                    return parsedData;
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception caught: {0}", e);
+                // TemplateView.addItemsToConsole("Error in " + templateName + " csv dumping -> " + e.Message);
+                return null;
+            }
+            return null;
+
         }
 
         // created by sudhir on 07.11.2017
-        private List<uint> getMeasIDs(Dictionary<object, List<PMUDataStructure>> parsedData)
+        private List<uint> GetMeasIDs(Dictionary<object, List<PMUDataStructure>> parsedData)
         {
             List<uint> measIDs = new List<uint>();
             foreach (var measData in parsedData)
@@ -196,12 +250,12 @@ namespace PMU_Plotter
         }
 
         // created by sudhir 30.12.2017
-        public PMUMeasDataLists getDataOfMeasId(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence = false)
+        public PMUMeasDataLists GetDataOfMeasId(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence = false)
         {
             if (checkMeasExistence)
             {
                 // check if the measId is the measurements list of parsed Data
-                List<uint> measIds = getMeasIDs(parsedData);
+                List<uint> measIds = GetMeasIDs(parsedData);
                 int measIndex = measIds.IndexOf(measId);
                 if (measIndex == -1)
                 {
@@ -223,10 +277,12 @@ namespace PMU_Plotter
             return lists;
         }
 
-        public async Task<PMUMeasDataLists> getDataOfMeasIdAsync(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence)
+        public async Task<PMUMeasDataLists> GetDataOfMeasIdAsync(Dictionary<object, List<PMUDataStructure>> parsedData, uint measId, bool checkMeasExistence)
         {
-            await Task.Delay(1);
-            return getDataOfMeasId(parsedData, measId, checkMeasExistence);
+            return await Task.Run<PMUMeasDataLists>(() =>
+            {
+                return GetDataOfMeasId(parsedData, measId, checkMeasExistence);
+            });
         }
     }
 }

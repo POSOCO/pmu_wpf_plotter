@@ -124,7 +124,7 @@ namespace PMU_Plotter
             // MessageBox.Show("You clicked 'Open...'");
             OpenFileDialog openFileDialog = new OpenFileDialog();
             // openFileDialog.Multiselect = true;
-            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+            openFileDialog.Filter = "EZT files (*.ezt)|*.ezt|All files (*.*)|*.*";
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
             if (openFileDialog.ShowDialog() == true)
             {
@@ -331,7 +331,7 @@ namespace PMU_Plotter
                     for (int i = 0; i < measurementIDs.Count; i++)
                     {
                         PMUMeasDataLists measurementData;
-                        measurementData = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                        measurementData = _historyAdapter.GetDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
                         if (window == 0)
                         {
                             measurementsData.Add(measurementData);
@@ -406,7 +406,6 @@ namespace PMU_Plotter
 
         public async Task PlotMeasIdsAsync(DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
         {
-            await Task.Delay(1); // 0 millisecond delay
             AddLinesToConsole("Started fetching async data");
             int dataRate = plotTemplate_.dataRate;
             List<int> measurementIDs = plotTemplate_.measIds;
@@ -463,7 +462,7 @@ namespace PMU_Plotter
                     for (int i = 0; i < measurementIDs.Count; i++)
                     {
                         PMUMeasDataLists measurementData;
-                        measurementData = await _historyAdapter.getDataOfMeasIdAsync(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                        measurementData = await _historyAdapter.GetDataOfMeasIdAsync(parsedData, (uint)measurementIDs.ElementAt(i), true);
                         cancellationToken.ThrowIfCancellationRequested();
                         if (window == 0)
                         {

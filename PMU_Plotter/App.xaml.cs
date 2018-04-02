@@ -41,6 +41,7 @@ namespace PMU_Plotter
             // Check if this was launched by double-clicking a doc. If so, use that as the
             // startup file name.
             if (AppDomain.CurrentDomain.SetupInformation
+                .ActivationArguments != null && AppDomain.CurrentDomain.SetupInformation
                 .ActivationArguments.ActivationData != null
             && AppDomain.CurrentDomain.SetupInformation
                 .ActivationArguments.ActivationData.Length > 0)

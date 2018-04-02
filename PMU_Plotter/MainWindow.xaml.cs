@@ -270,14 +270,14 @@ namespace PMU_Plotter
                 // lets keep step as 1 minute. Todo change step as per the plot preferences.
                 Step = dataRate;
                 // get 1st list and add to SeriesCollection
-                lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
+                lists = _historyAdapter.GetDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(0), true);
                 timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
                 SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
 
                 // get the data of remaining measurements and add to SeriesCollection
                 for (int i = 1; i < measurementIDs.Count; i++)
                 {
-                    lists = _historyAdapter.getDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
+                    lists = _historyAdapter.GetDataOfMeasId(parsedData, (uint)measurementIDs.ElementAt(i), true);
                     SeriesCollection.Add(new LineSeries() { Title = measurementNames.ElementAt(i).ToString() + "_" + measurementIDs.ElementAt(i).ToString(), Values = new ChartValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 1, LineSmoothness = 0 });
                 }
                 addLinesToConsole("Viola! Finished plotting");
