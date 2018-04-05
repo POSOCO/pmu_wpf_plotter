@@ -209,9 +209,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="AppSettings.xml">
+    <Content Include="AppSettings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </Content>
     <Content Include="logo.ico" />
     <None Include="Service References\HistoryProvider\PMU_Plotter.HistoryProvider.ConfigurationResponseElement.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
