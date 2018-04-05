@@ -275,7 +275,6 @@ namespace PMU_Plotter
                     {
                         plotTemplate_.endDateMode = value;
                     }
-
                 }
             }
 
@@ -357,7 +356,6 @@ namespace PMU_Plotter
 
         private void SaveTemplate(object sender, RoutedEventArgs e)
         {
-            // todo save the underlying file also
             if (NewMessage != null)
             {
                 if (MessageBox.Show("Update Plot Configuration ?", "Update Configurtion", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
@@ -367,7 +365,8 @@ namespace PMU_Plotter
                 else
                 {
                     NewMessage(this, new ConfigMessageEventArgs(measurementsVM.plotTemplate_));
-                }                
+                    this.Close();
+                }
             }
         }
     }

@@ -41,6 +41,17 @@ namespace PMU_Plotter
 
     public class VariableTime
     {
+        public VariableTime()
+        {
+        }
+
+        public VariableTime(double hours, double mins, double secs)
+        {
+            this.hours = hours;
+            this.mins = mins;
+            this.secs = secs;
+        }
+
         public double hours { get; set; } = 0;
         public double mins { get; set; } = 0;
         public double secs { get; set; } = 0;

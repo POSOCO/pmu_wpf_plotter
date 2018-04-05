@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace PMU_Plotter
 {
@@ -39,6 +40,7 @@ namespace PMU_Plotter
         public long Step { get; set; }
         public Func<double, string> YFormatter { get; set; }
         public Func<double, string> XFormatter { get; set; }
+        private DispatcherTimer FetchTimer_;
 
         public string PlotBackgroundColor
         {
@@ -66,15 +68,18 @@ namespace PMU_Plotter
 
         public List<DateTime> timeStamps_ { get; set; }
         PlotDataTemplate plotTemplate_;
+        AutoFetchConfig AutoFetchConfig_;
         ConfigurationManager _configManager;
         HistoryDataAdapter _historyAdapter;
         PointsConfigWindow configWindow;
+        FetchConfigWindow fetchConfigWindow;
 
         public GearedPlotWindow()
         {
             InitializeComponent();
             AddLinesToConsole("Welcome User!");
             plotTemplate_ = new PlotDataTemplate();
+            AutoFetchConfig_ = new AutoFetchConfig();
             _configManager = new ConfigurationManager();
             _configManager.Initialize();
             _historyAdapter = new HistoryDataAdapter();
@@ -100,6 +105,9 @@ namespace PMU_Plotter
             };
             MyChart.LegendLocation = LegendLocation.Top;
             DataContext = this;
+            FetchTimer_ = new DispatcherTimer();
+            UpdateFetcherInterval();
+            FetchTimer_.Tick += Fetch_Timer_Tick;            
         }
 
         private async void OpenFileName(string str)
@@ -204,6 +212,11 @@ namespace PMU_Plotter
             ResetAxes();
         }
 
+        private async void Fetch_Timer_Tick(object sender, EventArgs e)
+        {
+            await FetchAndPlotData();
+        }
+
         private async void FetchBtn_Click(object sender, RoutedEventArgs e)
         {
             await FetchAndPlotData();
@@ -212,10 +225,21 @@ namespace PMU_Plotter
 
         private void FetchStopBtn_Click(object sender, RoutedEventArgs e)
         {
+            StopFetching();
+        }
+
+        private void StopFetching()
+        {
             // stop running fetch tasks
             if (cts != null)
             {
                 cts.Cancel();
+            }
+
+            // stop the fetch timer if active
+            if (FetchTimer_.IsEnabled)
+            {
+                FetchTimer_.Stop();
             }
         }
 
@@ -722,16 +746,53 @@ namespace PMU_Plotter
             using (var stream = File.Create(fileName)) encoder.Save(stream);
         }
 
-        void MessageReceived(object sender, ConfigMessageEventArgs e)
+        void MessageReceived(object sender, EventArgs e)
         {
-            if (sender is PointsConfigWindow configWin)
+            if (sender is PointsConfigWindow configWin && e is ConfigMessageEventArgs plotTemplateArgs)
             {
                 // change the plot Data Template as per the window message
-                this.plotTemplate_ = e.dataTemplate;
+                this.plotTemplate_ = plotTemplateArgs.dataTemplate;
                 //todo use notifypropertychanged with a vm to notify the background and text colors
                 NotifyPropertyChanged("PlotBackgroundColor");
-                AddLinesToConsole("Changes saved...");
+                AddLinesToConsole("Plot Config changes saved...");
             }
+            else if (sender is FetchConfigWindow fetchConfigWin && e is AutoFetchConfigMessageEventArgs autoFetchConfigArgs)
+            {
+                // change the Auto fetch configuration as per the window message
+                this.AutoFetchConfig_ = autoFetchConfigArgs.AutoFetchConfig_;
+                // change the fetcher timer interval
+                UpdateFetcherInterval();
+                AddLinesToConsole("Auto Fetch config changes saved...");
+            }
+        }
+
+        public void UpdateFetcherInterval()
+        {
+            FetchTimer_.Interval = TimeSpan.FromSeconds(AutoFetchConfig_.TimePeriod_.hours * 60 * 60 + AutoFetchConfig_.TimePeriod_.mins * 60 + AutoFetchConfig_.TimePeriod_.secs);
+        }
+
+        private void AutoFetchStart_Click(object sender, RoutedEventArgs e)
+        {
+            StopFetching();
+            FetchTimer_.Start();
+        }
+
+        private void AutoFetchConfigBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (fetchConfigWindow == null)
+            {
+                fetchConfigWindow = new FetchConfigWindow();
+            }
+            else if (fetchConfigWindow.IsLoaded == false)
+            {
+                // https://social.msdn.microsoft.com/Forums/vstudio/en-US/c521ac47-7326-483a-be60-42de0e355711/how-can-a-method-of-a-wpf-window-find-out-if-the-window-is-closed-?forum=wpf
+                fetchConfigWindow.Close();
+                fetchConfigWindow = new FetchConfigWindow();
+            }
+            fetchConfigWindow.NewMessage += MessageReceived;
+            fetchConfigWindow.SetAutoFetchConfig(AutoFetchConfig_);
+            fetchConfigWindow.Show();
+            fetchConfigWindow.Activate();
         }
     }
 }

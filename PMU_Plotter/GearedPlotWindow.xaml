@@ -59,11 +59,12 @@
                 <MenuItem Header="Test">
                     <MenuItem Header="Test 10,000 Points" Click="TestBtn_Click"/>
                 </MenuItem>
-                <MenuItem Header="_Help">
-                    <MenuItem Header="_About" Click="About_Click"/>
-                </MenuItem>
                 <MenuItem Header="FetchData" Click="FetchBtn_Click"></MenuItem>
                 <MenuItem Header="StopFetch" Click="FetchStopBtn_Click"></MenuItem>
+                <MenuItem Header="AutoFetch">
+                    <MenuItem Header="Configure" Click="AutoFetchConfigBtn_Click"/>
+                    <MenuItem Header="Start" Click="AutoFetchStart_Click"/>
+                </MenuItem>
             </Menu>
         </StackPanel>
         <ScrollViewer Margin="5" CanContentScroll="False"
