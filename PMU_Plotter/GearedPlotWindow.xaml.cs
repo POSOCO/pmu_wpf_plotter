@@ -494,7 +494,7 @@ namespace PMU_Plotter
             // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
             PMUMeasDataLists lists = measurementsData.ElementAt(0);
             timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
+            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 1 });
 
             // get the data of remaining measurements and add to SeriesCollection
             for (int i = 1; i < measurementIDs.Count; i++)
