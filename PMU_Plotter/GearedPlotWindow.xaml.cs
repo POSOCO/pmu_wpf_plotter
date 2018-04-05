@@ -795,5 +795,17 @@ namespace PMU_Plotter
             fetchConfigWindow.Show();
             fetchConfigWindow.Activate();
         }
+
+        private void AppSettingsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AppSettingsWindow();
+            if (dialog.ShowDialog() == true)
+            {
+                // Reinitialize the Configuration Manager and History Adapter
+                _configManager.Initialize();
+                _historyAdapter.Initialize(_configManager);
+                AddLinesToConsole("Using updated Application settings !");
+            }
+        }
     }
 }

@@ -35,6 +35,8 @@
                     <MenuItem Header="SaveAs" Click="SaveAs_Click"/>
                     <MenuItem Header="Export" Click="ExportImage_Click"/>
                     <Separator />
+                    <MenuItem Header="Application Settings" Click="AppSettingsBtn_Click"/>
+                    <Separator />
                     <MenuItem Header="_Close" Click="Close_Click"/>
                 </MenuItem>
                 <MenuItem Header="_Window" >

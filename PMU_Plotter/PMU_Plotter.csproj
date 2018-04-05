@@ -28,7 +28,7 @@
     <ProductName>PMU_WPF_Plotter</ProductName>
     <PublisherName>WRLDC</PublisherName>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>2.1.0.0</ApplicationVersion>
+    <ApplicationVersion>2.2.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>false</BootstrapperEnabled>
@@ -106,6 +106,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppSettingsWindow.xaml.cs">
+      <DependentUpon>AppSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AutoFetchConfig.cs" />
     <Compile Include="BinaryData.cs" />
     <Compile Include="ConfigurationManager.cs" />
@@ -132,6 +135,10 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Page Include="AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AppSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -210,7 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppSettings.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="logo.ico" />
     <None Include="Service References\HistoryProvider\PMU_Plotter.HistoryProvider.ConfigurationResponseElement.datasource">
