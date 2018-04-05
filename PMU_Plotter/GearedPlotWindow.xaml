@@ -33,6 +33,7 @@
                     <Separator />
                     <MenuItem Command="Save"/>
                     <MenuItem Header="SaveAs" Click="SaveAs_Click"/>
+                    <MenuItem Header="Export" Click="ExportImage_Click"/>
                     <Separator />
                     <MenuItem Header="_Close" Click="Close_Click"/>
                 </MenuItem>

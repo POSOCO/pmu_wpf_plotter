@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace PMU_Plotter
 {
@@ -494,7 +495,7 @@ namespace PMU_Plotter
             // get 1st measurement Data and add to SeriesCollection, also update the timestamps and dataRate
             PMUMeasDataLists lists = measurementsData.ElementAt(0);
             timeStamps_ = new List<DateTime>(lists.pmuTimeStamps);
-            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 1 });
+            SeriesCollection.Add(new GLineSeries() { Title = measurementNames.ElementAt(0) + "_" + measurementIDs.ElementAt(0).ToString(), Values = new GearedValues<float>(lists.pmuVals), PointGeometry = null, Fill = Brushes.Transparent, StrokeThickness = 2, LineSmoothness = 0 });
 
             // get the data of remaining measurements and add to SeriesCollection
             for (int i = 1; i < measurementIDs.Count; i++)
@@ -688,6 +689,39 @@ namespace PMU_Plotter
             configWindow.Show();
             configWindow.Activate();
         }
+
+        private void ExportImage_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog savefileDialog = new SaveFileDialog();
+            // set a default file name
+            savefileDialog.FileName = plotTemplate_.dataSetName + ".png";
+            // set filters - this can be done in properties as well
+            savefileDialog.Filter = "PNG Files (*.png)|*.png|All files (*.*)|*.*";
+            if (savefileDialog.ShowDialog() == true)
+            {
+                if (savefileDialog.FileName != null)
+                {
+                    SaveToPng(MyChart, savefileDialog.FileName);
+                    AddLinesToConsole("Exported the image file !");
+                }
+            }
+        }
+
+        private void SaveToPng(FrameworkElement visual, string fileName)
+        {
+            var encoder = new PngBitmapEncoder();
+            EncodeVisual(visual, fileName, encoder);
+        }
+
+        private static void EncodeVisual(FrameworkElement visual, string fileName, BitmapEncoder encoder)
+        {
+            var bitmap = new RenderTargetBitmap((int)visual.ActualWidth, (int)visual.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(visual);
+            var frame = BitmapFrame.Create(bitmap);
+            encoder.Frames.Add(frame);
+            using (var stream = File.Create(fileName)) encoder.Save(stream);
+        }
+
         void MessageReceived(object sender, ConfigMessageEventArgs e)
         {
             if (sender is PointsConfigWindow configWin)
@@ -696,6 +730,7 @@ namespace PMU_Plotter
                 this.plotTemplate_ = e.dataTemplate;
                 //todo use notifypropertychanged with a vm to notify the background and text colors
                 NotifyPropertyChanged("PlotBackgroundColor");
+                AddLinesToConsole("Changes saved...");
             }
         }
     }

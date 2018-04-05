@@ -360,7 +360,14 @@ namespace PMU_Plotter
             // todo save the underlying file also
             if (NewMessage != null)
             {
-                NewMessage(this, new ConfigMessageEventArgs(measurementsVM.plotTemplate_));
+                if (MessageBox.Show("Update Plot Configuration ?", "Update Configurtion", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                {
+                    //do no stuff
+                }
+                else
+                {
+                    NewMessage(this, new ConfigMessageEventArgs(measurementsVM.plotTemplate_));
+                }                
             }
         }
     }
