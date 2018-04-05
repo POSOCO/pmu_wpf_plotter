@@ -226,6 +226,7 @@ namespace PMU_Plotter
         private void FetchStopBtn_Click(object sender, RoutedEventArgs e)
         {
             StopFetching();
+            AddLinesToConsole("Stopped Fetching");
         }
 
         private void StopFetching()

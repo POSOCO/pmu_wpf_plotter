@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PMU_Plotter"
         mc:Ignorable="d"
-        Title="Configure Points" Height="600" Width="600">
+        Title="Plot Settings" Height="600" Width="600">
     <Grid Name="ConfigForm">
         <Grid.Resources>
             <local:IsAbsoluteDateVisibleConverter x:Key="IsAbsoluteDateVisibleConverter"/>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PMU_Plotter"
         mc:Ignorable="d"
-        Title="FetchConfigWindow" Height="300" Width="300">
+        Title="Auto Fetch Settings" Height="300" Width="300">
     <Grid Name="AutoFetchConfigForm">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
