@@ -30,7 +30,7 @@ namespace PMU_Plotter
 
         private void UpdateBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Update Application Settings ?", "Update Application Settings", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+            if (MessageBox.Show("Update Application Settings ?", "Application Settings", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
             {
                 //do no stuff
             }
